@@ -19,7 +19,7 @@ public class Main {
                 if(game.attemptStep(toInt(input[0]), toInt(input[1]), toInt(input[2]), toInt(input[3]))){
                     moveTaken = true;
                 }
-                if(game.attemptJump(toInt(input[0]), toInt(input[1]), toInt(input[2]), toInt(input[3]))){
+                else if(game.attemptJump(toInt(input[0]), toInt(input[1]), toInt(input[2]), toInt(input[3]))){
                     //TODO test double jump.
                     int currentColumn = toInt(input[2]);
                     int currentRow = toInt(input[3]);
@@ -42,6 +42,7 @@ public class Main {
                 System.out.print("Invalid Input\n");
             }else{
                 game.nextTurn();
+                moveTaken = false;
             }
         }
     }

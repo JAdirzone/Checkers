@@ -65,7 +65,7 @@ public class Game {
             Checker movingChecker = board[column - 1][row - 1];
             board[column - 1][row - 1] = Checker.EMPTY;
             board[targetColumn - 1][targetRow - 1] = movingChecker;
-            board[(targetColumn - column) / 2 + column][(targetRow - row) / 2 + row] = Checker.EMPTY;
+            board[(targetColumn - column) / 2 + column - 1][(targetRow - row) / 2 + row - 1] = Checker.EMPTY;
             return true;
         }
         return false;
@@ -100,7 +100,6 @@ public class Game {
         return ((column + row) % 2 == 0) && row >= 1 && row <= 8 && column >= 1 && column <= 8;
     }
 
-    //TODO Fix to work for black player (still need to flip the whiteTurn value elsewhere)
     private boolean checkStep(int column, int row, int targetColumn, int targetRow){
         return checkDark(column, row)
                 && checkDark(targetColumn, targetRow)
@@ -112,18 +111,20 @@ public class Game {
                 && Math.abs(targetColumn - column) == 1
                 && Math.abs(targetRow - row) == 1;
     }
-    //TODO Fix to work for black player (still need to flip the whiteTurn value elsewhere)
+    //TODO Fix to work for black player (Needs to make call to movingForward() )
     public boolean checkJump(int column, int row, int targetColumn, int targetRow){
+        System.out.println("col: " + ((targetColumn - column) / 2 + column));
+        System.out.println("row: " + ((targetRow - row) / 2 + row));
         return checkDark(column, row)
                 && checkDark(targetColumn, targetRow)
                 && board[column - 1][row - 1].isChecker()
                 && board[column - 1][row - 1].isWhite() == whiteTurn
                 && board[targetColumn - 1][targetRow - 1] == Checker.EMPTY
                 && Math.abs(targetColumn - column) == 2
-                && (targetRow - row == 2 ||
-                board[column - 1][row - 1].isKing() && Math.abs(targetRow - row) == 2)
-                && board[(targetColumn - column) / 2 + column][(targetRow - row) / 2 + row].isChecker()
-                && board[(targetColumn - column) / 2 + column][(targetRow - row) / 2 + row].isWhite() != whiteTurn;
+                && Math.abs(targetRow - row) == 2
+                && (movingForward(row, targetRow) || board[column - 1][row - 1].isKing())
+                && board[(targetColumn - column) / 2 + column - 1][(targetRow - row) / 2 + row - 1].isChecker()
+                && board[(targetColumn - column) / 2 + column - 1][(targetRow - row) / 2 + row - 1].isWhite() != whiteTurn;
     }
 
     public boolean movingForward(int row, int targetRow){
