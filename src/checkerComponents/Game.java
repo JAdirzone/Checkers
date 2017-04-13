@@ -135,5 +135,16 @@ public class Game {
         whiteTurn = !whiteTurn;
     }
 
+    public boolean currentPlayerWins(){
+        for(int row = 0; row <= 7; row++){
+            int preCol = row % 2;
+            for(int column = preCol; column <= 7; column += 2){
+                if(board[column][row].isChecker() && board[column][row].isWhite() != whiteTurn){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 }
 
