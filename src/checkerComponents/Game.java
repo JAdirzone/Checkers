@@ -1,5 +1,7 @@
 package checkerComponents;
 
+import java.util.ArrayList;
+
 /**
  * Created by Jay on 3/22/2017.
  */
@@ -49,7 +51,7 @@ public class Game {
         return result;
     }
 
-    //TODO And check for "King Me"
+    //Don't use. Will remove when comfortable
     public boolean attemptStep(int column, int row, int targetColumn, int targetRow){
         if(checkStep(column, row, targetColumn, targetRow)){
             Checker movingChecker = board[column - 1][row -1];
@@ -59,7 +61,7 @@ public class Game {
         }
         return false;
     }
-
+    //Don't use! Will remove when comfortable
     public boolean attemptJump(int column, int row, int targetColumn, int targetRow){
         if(checkJump(column, row, targetColumn, targetRow)){
             Checker movingChecker = board[column - 1][row - 1];
@@ -71,50 +73,49 @@ public class Game {
         return false;
     }
 
-
-    /**
-     * Verifies that a given coordinate is a usable square on a checker board(That it is a dark square)
-     * Does not check if the square is occupied, or reachable, etc.
-     *
-     * I think I'll just use (int, int) internally from now on.
-     * //TODO Remove this one.
-     */
-    private boolean checkDark(char column, int row){
-        column = Character.toLowerCase(column);
-        int columnNum;
-        switch(column){
-            case 'a' : columnNum = 1; break;
-            case 'b' : columnNum = 2; break;
-            case 'c' : columnNum = 3; break;
-            case 'd' : columnNum = 4; break;
-            case 'e' : columnNum = 5; break;
-            case 'f' : columnNum = 6; break;
-            case 'g' : columnNum = 7; break;
-            case 'h' : columnNum = 8; break;
-            default  : columnNum = 0;
+    //TODO And check for "King Me"
+    //TODO Convert this.
+    public boolean Step(int column, int row, int targetColumn, int targetRow){
+        if(checkStep(column, row, targetColumn, targetRow)){
+            Checker movingChecker = board[column - 1][row -1];
+            board[column - 1][row - 1] = Checker.EMPTY;
+            board[targetColumn - 1][targetRow - 1] = movingChecker;//Pass by value, or reference?
+            return true;
         }
-        return checkDark(columnNum, row);
+        return false;
+    }
+
+    //TODO And check for "King Me"
+    //TODO Convert this
+    public boolean Jump(int column, int row, int targetColumn, int targetRow){
+        if(checkJump(column, row, targetColumn, targetRow)){
+            Checker movingChecker = board[column - 1][row - 1];
+            board[column - 1][row - 1] = Checker.EMPTY;
+            board[targetColumn - 1][targetRow - 1] = movingChecker;
+            board[(targetColumn - column) / 2 + column - 1][(targetRow - row) / 2 + row - 1] = Checker.EMPTY;
+            return true;
+        }
+        return false;
     }
 
     private boolean checkDark(int column, int row){
         return ((column + row) % 2 == 0) && row >= 1 && row <= 8 && column >= 1 && column <= 8;
     }
 
-    private boolean checkStep(int column, int row, int targetColumn, int targetRow){
-        return checkDark(column, row)
-                && checkDark(targetColumn, targetRow)
-                && board[column - 1][row - 1].isChecker()
-                && board[column - 1][row - 1].isWhite() == whiteTurn
-                && board[targetColumn - 1][targetRow - 1] == Checker.EMPTY
-                && Math.abs(targetColumn - column) == 1
-                && (movingForward(row, targetRow) || board[column - 1][row -1].isKing())
-                && Math.abs(targetColumn - column) == 1
-                && Math.abs(targetRow - row) == 1;
+    //TODO Add check for only 4 integers(Maybe elsewhere).
+    public boolean checkStep(ArrayList<Integer> move){
+        return checkDark(move.get(0), move.get(1))
+                && checkDark(move.get(2), move.get(3))
+                && board[move.get(0) - 1][move.get(1) - 1].isChecker()
+                && board[move.get(0) - 1][move.get(1) - 1].isWhite() == whiteTurn
+                && board[move.get(2) - 1][move.get(3) - 1] == Checker.EMPTY
+                && Math.abs(move.get(2) - move.get(0)) == 1
+                && (movingForward(move.get(1), move.get(3)) || board[move.get(0) - 1][move.get(1) -1].isKing())
+                && Math.abs(move.get(2) - move.get(0)) == 1
+                && Math.abs(move.get(3) - move.get(1)) == 1;
     }
-    //TODO Fix to work for black player (Needs to make call to movingForward() )
+    //TODO convert this as well.
     public boolean checkJump(int column, int row, int targetColumn, int targetRow){
-        System.out.println("col: " + ((targetColumn - column) / 2 + column));
-        System.out.println("row: " + ((targetRow - row) / 2 + row));
         return checkDark(column, row)
                 && checkDark(targetColumn, targetRow)
                 && board[column - 1][row - 1].isChecker()
