@@ -8,23 +8,22 @@ import java.util.Scanner;
 /**
  * Created by Jay on 4/13/2017.
  */
-public class humanPlayer implements player{
+public class HumanPlayer implements Player {
     private Scanner scanner;
     private Game game;
     private boolean isWhitePlayer;
 
-    public humanPlayer(Game game, boolean isWhitePlayer){
+    public HumanPlayer(Game game, boolean isWhitePlayer){
         this.scanner = new Scanner(System.in);
         this.game = game;
         this.isWhitePlayer = isWhitePlayer;
     }
 
     /**
-     * At this stage, input is only validated for formatting.
-     * (Can it be made into an arrayList of integers of an appropriate length)
-     * @return An arrayList of integers representing the desired move (Not necessarily a valid move)
+     * @return An arrayList of integers representing a valid move
      */
-    public ArrayList<Integer> getMove(){
+    //TODO Clean up. Add check for forced jump.
+    public ArrayList<Integer> getMoveOld(){
         System.out.println("Input your move.");
         String[] input = scanner.next().split(",");
         if(input.length % 2 == 1 || input.length <= 3){
@@ -42,12 +41,37 @@ public class humanPlayer implements player{
             if(!game.checkJump(result)){
                 return getMove();
             }
-            //add checkJump
-            return result;
+            return result; //successful case
         } catch (NumberFormatException nfe) {
             System.out.println("Invalid move. (None integer value)");
             return getMove();
         }
+    }
+
+    public ArrayList<Integer> getMove(){
+        System.out.println("Input your move.");
+        String[] input = scanner.next().split(",");
+        if(input.length % 2 == 0 || input.length >= 4){
+            try {
+                ArrayList<Integer> result =  new ArrayList<>();
+                for (String string : input) {
+                    result.add(Integer.parseInt(string));
+                }
+                if(game.checkStep(result)){ //Add check for forced jump here.
+                    return result;
+                }
+                if(game.checkJump(result)){
+                    return result;
+                }
+                System.out.println("Invalid move.");
+                return getMove(); //impossible move.
+            } catch (NumberFormatException nfe) {
+                System.out.println("Invalid move.");
+                return getMove(); //Invalid input
+            }
+        }
+        System.out.println("Invalid Move.");
+        return getMove(); //Wrong number of inputs.
     }
 
     public String getColorString(){

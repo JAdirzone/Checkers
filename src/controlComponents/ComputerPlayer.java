@@ -7,11 +7,11 @@ import java.util.ArrayList;
 /**
  * Created by Jay on 4/13/2017.
  */
-public class aiPlayer implements player{
+public class ComputerPlayer implements Player {
     private Game game; //Reference to original game
     private boolean isWhitePlayer;
 
-    public aiPlayer(Game game, boolean isWhitePlayer){
+    public ComputerPlayer(Game game, boolean isWhitePlayer){
         this.game = game;
         this.isWhitePlayer = isWhitePlayer;
     }

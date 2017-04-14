@@ -51,82 +51,91 @@ public class Game {
         return result;
     }
 
-    //Don't use. Will remove when comfortable
-    public boolean attemptStep(int column, int row, int targetColumn, int targetRow){
-        if(checkStep(column, row, targetColumn, targetRow)){
-            Checker movingChecker = board[column - 1][row -1];
-            board[column - 1][row - 1] = Checker.EMPTY;
-            board[targetColumn - 1][targetRow - 1] = movingChecker;//Pass by value, or reference?
-            return true;
+    //Input must be validated before calling this.
+    public void move(ArrayList<Integer> move){
+        if(Math.abs(move.get(0) - move.get(1)) == 1){
+            step(move.get(0), move.get(1), move.get(2), move.get(3));
+        } else{
+            jump(move);
         }
-        return false;
-    }
-    //Don't use! Will remove when comfortable
-    public boolean attemptJump(int column, int row, int targetColumn, int targetRow){
-        if(checkJump(column, row, targetColumn, targetRow)){
-            Checker movingChecker = board[column - 1][row - 1];
-            board[column - 1][row - 1] = Checker.EMPTY;
-            board[targetColumn - 1][targetRow - 1] = movingChecker;
-            board[(targetColumn - column) / 2 + column - 1][(targetRow - row) / 2 + row - 1] = Checker.EMPTY;
-            return true;
-        }
-        return false;
     }
 
-    //TODO And check for "King Me"
-    //TODO Convert this.
-    public boolean Step(int column, int row, int targetColumn, int targetRow){
-        if(checkStep(column, row, targetColumn, targetRow)){
-            Checker movingChecker = board[column - 1][row -1];
-            board[column - 1][row - 1] = Checker.EMPTY;
-            board[targetColumn - 1][targetRow - 1] = movingChecker;//Pass by value, or reference?
-            return true;
-        }
-        return false;
+    //TODO Add check for "King Me"
+    //Input must be validated before calling this.
+    public void step(int column, int row, int targetColumn, int targetRow){
+        Checker movingChecker = board[column - 1][row -1];
+        board[column - 1][row - 1] = Checker.EMPTY;
+        board[targetColumn - 1][targetRow - 1] = movingChecker;//Pass by value, or reference?
     }
 
-    //TODO And check for "King Me"
-    //TODO Convert this
-    public boolean Jump(int column, int row, int targetColumn, int targetRow){
-        if(checkJump(column, row, targetColumn, targetRow)){
-            Checker movingChecker = board[column - 1][row - 1];
-            board[column - 1][row - 1] = Checker.EMPTY;
-            board[targetColumn - 1][targetRow - 1] = movingChecker;
-            board[(targetColumn - column) / 2 + column - 1][(targetRow - row) / 2 + row - 1] = Checker.EMPTY;
-            return true;
+    //TODO Add check for "King Me" here?
+    //Input must be validated before calling this.
+    private void subJump(int column, int row, int targetColumn, int targetRow){
+        Checker movingChecker = board[column - 1][row - 1];
+        board[column - 1][row - 1] = Checker.EMPTY;
+        board[targetColumn - 1][targetRow - 1] = movingChecker;
+        board[(targetColumn - column) / 2 + column - 1][(targetRow - row) / 2 + row - 1] = Checker.EMPTY;
+    }
+
+    //TODO Add check for "King me" here?
+    //Input must be validated before calling this.
+    public void jump(ArrayList<Integer> jump){
+        for(int i = 4; i <= jump.size(); i += 2){
+            subJump(jump.get(i - 4), jump.get(i - 3), jump.get(i - 2), jump.get(i - 1));
         }
-        return false;
     }
 
     private boolean checkDark(int column, int row){
         return ((column + row) % 2 == 0) && row >= 1 && row <= 8 && column >= 1 && column <= 8;
     }
 
-    //TODO Add check for only 4 integers(Maybe elsewhere).
-    public boolean checkStep(ArrayList<Integer> move){
-        return checkDark(move.get(0), move.get(1))
-                && checkDark(move.get(2), move.get(3))
-                && board[move.get(0) - 1][move.get(1) - 1].isChecker()
-                && board[move.get(0) - 1][move.get(1) - 1].isWhite() == whiteTurn
-                && board[move.get(2) - 1][move.get(3) - 1] == Checker.EMPTY
-                && Math.abs(move.get(2) - move.get(0)) == 1
-                && (movingForward(move.get(1), move.get(3)) || board[move.get(0) - 1][move.get(1) -1].isKing())
-                && Math.abs(move.get(2) - move.get(0)) == 1
-                && Math.abs(move.get(3) - move.get(1)) == 1;
+
+    //TODO add check to allow for non-king to backwards double jump
+    private boolean checkSubStep(int column, int row, int targetColumn, int targetRow){
+        return checkDark(column, row)
+                && checkDark(targetColumn, targetRow)
+                && board[column - 1][row - 1].isChecker()
+                && board[column - 1][row - 1].isWhite() == whiteTurn
+                && board[targetColumn - 1][targetRow - 1] == Checker.EMPTY
+                && Math.abs(targetColumn - column) == 1
+                && (movingForward(row, targetRow) || board[column - 1][row -1].isKing())
+                && Math.abs(targetColumn - column) == 1
+                && Math.abs(targetRow - row) == 1;
     }
-    //TODO convert this as well.
-    public boolean checkJump(int column, int row, int targetColumn, int targetRow){
-        return checkDark(move.get(0), move.get(1))
-                && checkDark(move.get(2), move.get(3))
-                && board[move.get(0) - 1][move.get(1) - 1].isChecker()
-                && board[move.get(0) - 1][move.get(1) - 1].isWhite() == whiteTurn
-                && board[move.get(2) - 1][move.get(3) - 1] == Checker.EMPTY
-                && Math.abs(move.get(2) - column) == 2
+
+    public boolean checkSubJump(int column, int row, int targetColumn, int targetRow){
+        return checkDark(column, row)
+                && checkDark(targetColumn, targetRow)
+                && board[column - 1][row - 1].isChecker()
+                && board[column - 1][row - 1].isWhite() == whiteTurn
+                && board[targetColumn - 1][targetRow - 1] == Checker.EMPTY
+                && Math.abs(targetColumn - column) == 2
                 && Math.abs(targetRow - row) == 2
                 && (movingForward(row, targetRow) || board[column - 1][row - 1].isKing())
                 && board[(targetColumn - column) / 2 + column - 1][(targetRow - row) / 2 + row - 1].isChecker()
                 && board[(targetColumn - column) / 2 + column - 1][(targetRow - row) / 2 + row - 1].isWhite() != whiteTurn;
     }
+
+    public boolean checkStep(ArrayList<Integer> step){
+        return step.size() == 4 && checkSubStep(step.get(0), step.get(1), step.get(2), step.get(3));
+    }
+
+    public boolean checkJump(ArrayList<Integer> jump){
+        for(int i = 4; i <= jump.size(); i += 2){
+            if(!checkSubJump(jump.get(i - 4), jump.get(i - 3), jump.get(i - 2), jump.get(i - 1))){
+                return false;
+            }
+        }
+        return !checkSubJump(jump.get(jump.size() - 2), jump.get(jump.size() - 1),
+                    jump.get(jump.size() - 2) + 2, jump.get(jump.size() - 1) + 2)
+                && !checkSubJump(jump.get(jump.size() - 2), jump.get(jump.size() - 1),
+                    jump.get(jump.size() - 2) + 2, jump.get(jump.size() - 1) - 2)
+                && !checkSubJump(jump.get(jump.size() - 2), jump.get(jump.size() - 1),
+                    jump.get(jump.size() - 2) - 2, jump.get(jump.size() - 1) + 2)
+                && !checkSubJump(jump.get(jump.size() - 2), jump.get(jump.size() - 1),
+                    jump.get(jump.size() - 2) - 2, jump.get(jump.size() - 1) - 2);
+    }
+
 
     public boolean movingForward(int row, int targetRow){
         return (targetRow - row > 0 && whiteTurn) || (targetRow - row < 0 && !whiteTurn);
@@ -134,6 +143,10 @@ public class Game {
 
     public void nextTurn(){
         whiteTurn = !whiteTurn;
+    }
+
+    public boolean isWhiteTurn(){
+        return isWhiteTurn();
     }
 
     public boolean currentPlayerWins(){
@@ -146,6 +159,20 @@ public class Game {
             }
         }
         return true;
+    }
+    //TODO fix. Check whose turn it is, and if a checker is even there.
+    public boolean forcedJump(){ //TODO Pull the inner most part out into its own method. Use in check jump
+        for(int row = 0; row <= 7; row++){
+            int preCol = row % 2;
+            for(int column = preCol; column <= 7; column += 2){
+                if(checkSubJump(column, row, column + 2, row + 2)
+                        && !checkSubJump(column, row,column + 2, row - 2)
+                        && !checkSubJump(column, row,column - 2, row + 2)
+                        && !checkSubJump(column, row,column - 2, row - 2)) {
+
+                }
+            }
+        }
     }
 }
 
