@@ -116,12 +116,12 @@ public class Game {
     }
     //TODO convert this as well.
     public boolean checkJump(int column, int row, int targetColumn, int targetRow){
-        return checkDark(column, row)
-                && checkDark(targetColumn, targetRow)
-                && board[column - 1][row - 1].isChecker()
-                && board[column - 1][row - 1].isWhite() == whiteTurn
-                && board[targetColumn - 1][targetRow - 1] == Checker.EMPTY
-                && Math.abs(targetColumn - column) == 2
+        return checkDark(move.get(0), move.get(1))
+                && checkDark(move.get(2), move.get(3))
+                && board[move.get(0) - 1][move.get(1) - 1].isChecker()
+                && board[move.get(0) - 1][move.get(1) - 1].isWhite() == whiteTurn
+                && board[move.get(2) - 1][move.get(3) - 1] == Checker.EMPTY
+                && Math.abs(move.get(2) - column) == 2
                 && Math.abs(targetRow - row) == 2
                 && (movingForward(row, targetRow) || board[column - 1][row - 1].isKing())
                 && board[(targetColumn - column) / 2 + column - 1][(targetRow - row) / 2 + row - 1].isChecker()
