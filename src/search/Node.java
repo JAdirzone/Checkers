@@ -25,8 +25,8 @@ public class Node {
         max = maxMin;
         parent = par;
         move = causingMove;
-        //TODO Check for pruning here, for children are possible. This means the hueristic will have to run here too.
-        game.forcedJump();
+        //TODO Check for pruning here, for if children are possible. This means the hueristic will have to run here too.
+        game.forcedJump();                                              //No it does not
         if(game.forcedJump()){
             generateStepChildren(game);
         }
@@ -94,6 +94,16 @@ public class Node {
     }
 
     public void generateJumpChildren(Game game){
-
+        for(int row = 0; row <= 7; row++){
+            int preCol = row % 2;
+            for(int column = preCol; column <= 7; column += 2) {
+                if (game.checkerCheck(column + 1, row + 1, !max)) {
+                    JumpNode head = new JumpNode(game, column + 1, row + 1, null); //Potential Problem wiih Null?
+                    while (head.hasChildren()) {
+                        children.add(new Node(game, this, head.nextFullNode(), !max));
+                    }
+                }
+            }
+        }
     }
 }
