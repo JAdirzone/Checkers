@@ -92,7 +92,7 @@ public class Game {
 
     //TODO add check to allow for non-king to backwards double jump
 
-    private boolean checkSubStep(int column, int row, int targetColumn, int targetRow){
+    public boolean checkSubStep(int column, int row, int targetColumn, int targetRow){
         return checkDark(column, row)
                 && checkDark(targetColumn, targetRow)
                 && board[column - 1][row - 1].isChecker()
@@ -176,11 +176,16 @@ public class Game {
         return false;
     }
 
+    //TODO use in checkJump.
     public boolean availableJump(int column, int row){
         return checkSubJump(column, row, column + 2, row + 2)
                 || checkSubJump(column, row,column + 2, row - 2)
                 || checkSubJump(column, row,column - 2, row + 2)
                 || checkSubJump(column, row,column - 2, row - 2);
+    }
+
+    public boolean checkerCheck(int column, int row, boolean isWhite){
+        return board[column - 1][row - 1].isChecker() && board[column - 1][row - 1].isWhite() == isWhite;
     }
 }
 
