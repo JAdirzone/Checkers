@@ -91,6 +91,7 @@ public class Game {
 
 
     //TODO add check to allow for non-king to backwards double jump
+
     private boolean checkSubStep(int column, int row, int targetColumn, int targetRow){
         return checkDark(column, row)
                 && checkDark(targetColumn, targetRow)
@@ -146,7 +147,7 @@ public class Game {
     }
 
     public boolean isWhiteTurn(){
-        return isWhiteTurn();
+        return whiteTurn;
     }
 
     public boolean currentPlayerWins(){
@@ -160,19 +161,26 @@ public class Game {
         }
         return true;
     }
-    //TODO fix. Check whose turn it is, and if a checker is even there.
-    public boolean forcedJump(){ //TODO Pull the inner most part out into its own method. Use in check jump
+
+    public boolean forcedJump(){
         for(int row = 0; row <= 7; row++){
             int preCol = row % 2;
             for(int column = preCol; column <= 7; column += 2){
-                if(checkSubJump(column, row, column + 2, row + 2)
-                        && !checkSubJump(column, row,column + 2, row - 2)
-                        && !checkSubJump(column, row,column - 2, row + 2)
-                        && !checkSubJump(column, row,column - 2, row - 2)) {
-
+                if(board[column][row].isChecker()
+                        && board[column ][row].isWhite() == isWhiteTurn()
+                        && availableJump(column + 1, row + 1)) {
+                    return true;
                 }
             }
         }
+        return false;
+    }
+
+    public boolean availableJump(int column, int row){
+        return checkSubJump(column, row, column + 2, row + 2)
+                || checkSubJump(column, row,column + 2, row - 2)
+                || checkSubJump(column, row,column - 2, row + 2)
+                || checkSubJump(column, row,column - 2, row - 2);
     }
 }
 
