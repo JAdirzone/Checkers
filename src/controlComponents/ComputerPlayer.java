@@ -16,6 +16,7 @@ public class ComputerPlayer implements Player {
         this.isWhitePlayer = isWhitePlayer;
     }
 
+    //TODO
     public ArrayList<Integer> getMove(){
         return new ArrayList<>();
     }

@@ -2,6 +2,8 @@ package checkerComponents;
 
 import java.util.ArrayList;
 
+import static checkerComponents.Checker.EMPTY;
+
 /**
  * Created by Jay on 3/22/2017.
  */
@@ -24,7 +26,7 @@ public class Game {
                      board[column - 1][row - 1] = Checker.BLACK;
                  }
                  else{
-                     board[column - 1][row - 1] = Checker.EMPTY;
+                     board[column - 1][row - 1] = EMPTY;
                  }
              }
          }
@@ -64,7 +66,7 @@ public class Game {
     //Input must be validated before calling this.
     public void step(int column, int row, int targetColumn, int targetRow){
         Checker movingChecker = board[column - 1][row -1];
-        board[column - 1][row - 1] = Checker.EMPTY;
+        board[column - 1][row - 1] = EMPTY;
         board[targetColumn - 1][targetRow - 1] = movingChecker;//Pass by value, or reference?
     }
 
@@ -72,9 +74,9 @@ public class Game {
     //Input must be validated before calling this.
     private void subJump(int column, int row, int targetColumn, int targetRow){
         Checker movingChecker = board[column - 1][row - 1];
-        board[column - 1][row - 1] = Checker.EMPTY;
+        board[column - 1][row - 1] = EMPTY;
         board[targetColumn - 1][targetRow - 1] = movingChecker;
-        board[(targetColumn - column) / 2 + column - 1][(targetRow - row) / 2 + row - 1] = Checker.EMPTY;
+        board[(targetColumn - column) / 2 + column - 1][(targetRow - row) / 2 + row - 1] = EMPTY;
     }
 
     //TODO Add check for "King me" here?
@@ -91,13 +93,12 @@ public class Game {
 
 
     //TODO add check to allow for non-king to backwards double jump
-
     public boolean checkSubStep(int column, int row, int targetColumn, int targetRow){
         return checkDark(column, row)
                 && checkDark(targetColumn, targetRow)
                 && board[column - 1][row - 1].isChecker()
                 && board[column - 1][row - 1].isWhite() == whiteTurn
-                && board[targetColumn - 1][targetRow - 1] == Checker.EMPTY
+                && board[targetColumn - 1][targetRow - 1] == EMPTY
                 && Math.abs(targetColumn - column) == 1
                 && (movingForward(row, targetRow) || board[column - 1][row -1].isKing())
                 && Math.abs(targetColumn - column) == 1
@@ -109,7 +110,7 @@ public class Game {
                 && checkDark(targetColumn, targetRow)
                 && board[column - 1][row - 1].isChecker()
                 && board[column - 1][row - 1].isWhite() == whiteTurn
-                && board[targetColumn - 1][targetRow - 1] == Checker.EMPTY
+                && board[targetColumn - 1][targetRow - 1] == EMPTY
                 && Math.abs(targetColumn - column) == 2
                 && Math.abs(targetRow - row) == 2
                 && (movingForward(row, targetRow) || board[column - 1][row - 1].isKing())
@@ -187,5 +188,30 @@ public class Game {
     public boolean checkerCheck(int column, int row, boolean isWhite){
         return board[column - 1][row - 1].isChecker() && board[column - 1][row - 1].isWhite() == isWhite;
     }
+
+    //Must validate input before calling
+    //target values represent the place being moved back to
+    //TODO need to be able to undo becoming a king.
+    public void undoSubJump(int column, int row, int targetColumn, int targetRow, Checker jumpedChecker, boolean whitePlayer){
+        board[targetColumn - 1][targetRow - 1] = board[column - 1][row - 1];
+        board[column - 1][row - 1] = EMPTY;
+        board[(targetColumn - column) / 2 + column - 1][(targetRow - row) / 2 + row - 1] = jumpedChecker;
+    }
+    //TODO need to be able to undo becoming a king
+    public void undoSubStep(int column, int row, int targetColumn, int targetRow){
+        board[targetColumn - 1][targetRow - 1] = board[column - 1][row - 1];
+        board[column - 1][row - 1] = EMPTY;
+    }
+
+    public void undoStep(ArrayList<Integer> move){
+        undoSubStep(move.get(0), move.get(1), move.get(2), move.get(3));
+    }
+
+    public void undoJump(ArrayList<Integer> move, ArrayList<Checker> jumpedCheckers, boolean whitePlayer){
+        for(int i = 3; i < move.size(); i += 2){
+            //TODO finish
+        }
+    }
+
 }
 
