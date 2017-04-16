@@ -192,7 +192,7 @@ public class Game {
     //Must validate input before calling
     //target values represent the place being moved back to
     //TODO need to be able to undo becoming a king.
-    public void undoSubJump(int column, int row, int targetColumn, int targetRow, Checker jumpedChecker, boolean whitePlayer){
+    public void undoSubJump(int column, int row, int targetColumn, int targetRow, Checker jumpedChecker){
         board[targetColumn - 1][targetRow - 1] = board[column - 1][row - 1];
         board[column - 1][row - 1] = EMPTY;
         board[(targetColumn - column) / 2 + column - 1][(targetRow - row) / 2 + row - 1] = jumpedChecker;
@@ -207,9 +207,12 @@ public class Game {
         undoSubStep(move.get(0), move.get(1), move.get(2), move.get(3));
     }
 
-    public void undoJump(ArrayList<Integer> move, ArrayList<Checker> jumpedCheckers, boolean whitePlayer){
-        for(int i = 3; i < move.size(); i += 2){
-            //TODO finish
+    public void undoJump(ArrayList<Integer> move, ArrayList<Checker> jumpedCheckers){
+        int counter = 0;
+        for(int i = move.size() - 1; i <= 3; i -= 2){
+            undoSubJump(move.get(i - 1), move.get(i), move.get(i - 3), move.get(i - 2),
+                    jumpedCheckers.get(jumpedCheckers.size() - 1 - counter));
+            counter++;
         }
     }
 

@@ -12,7 +12,8 @@ public class Node {
     //It may be better not to store many of these as instance variables; Just take them as arguments.
     private static int maxDepth = 5;
     private Node parent;
-    private ArrayList<Node> children; //I think it only ever has one child. If that is the case, switch
+    //private ArrayList<Node> children; //I think it only ever has one child. If that is the case, switch
+    private child;
     private ArrayList<Integer> move; //The move that this node represents
     private ArrayList<Integer> bestMove;
     private int bestMoveValue;
@@ -51,14 +52,15 @@ public class Node {
         if(Math.abs(children.get(children.size() - 1).bestMove.get(0) - children.get(children.size() - 1).bestMove.get(2)) == 1){
             game.undoStep(move);
         }else{ //undo jump
-
+            game.undoJump(move, jumpedCheckers);
         }
+        //TODO remove the child that just returned.
 
     }
 
     private void branch(Game game, ArrayList<Integer> nextMove){
         children.add(new Node(game, this, nextMove, !max));
-        backTracked();
+        backTracked(game);
     }
 
     //TODO values being passed to checkSubStep may be off by one. look into this.
