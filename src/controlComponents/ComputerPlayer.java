@@ -19,7 +19,7 @@ public class ComputerPlayer implements Player {
 
 
     public ArrayList<Integer> getMove(){
-        Node tree = new Node(game, null, null, true, 0);
+        Node tree = new Node(game, true, 0);
         return tree.getBestMove();
     }
 

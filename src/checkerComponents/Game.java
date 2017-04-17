@@ -173,7 +173,7 @@ public class Game {
             int preCol = row % 2;
             for(int column = preCol; column <= 7; column += 2){
                 if(board[column][row].isChecker()
-                        && board[column ][row].isWhite() == isWhiteTurn()
+                        && board[column][row].isWhite() == isWhiteTurn()
                         && availableJump(column + 1, row + 1)) {
                     return true;
                 }

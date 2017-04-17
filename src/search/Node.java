@@ -17,7 +17,7 @@ public class Node {
     private Node child; //should replace children
     private ArrayList<Integer> move; //The move that this node represents
     private ArrayList<Integer> bestMove;
-    private int bestMoveValue; //Best move value and value are the same thing.
+    //private int bestMoveValue; //Best move value and value are the same thing.
     private int value;
     private boolean max; //Whether this node is trying to maximize of minimize. Max is the black player's move
     private ArrayList<Checker> jumpedCheckers;//The checkers that were jumped in this node's move, in the order they were jumped
@@ -25,40 +25,55 @@ public class Node {
     private int currentDepth;
 
     //board should be a copy of the board actually being used by the game.
-    public Node(Game game, Node par, ArrayList<Integer> causingMove, boolean maxMin, int currentDepth){
-        //children  = new ArrayList<>();
+    public Node(Game game, Node parent, ArrayList<Integer> move, boolean max, int currentDepth){
+        this.parent = parent;
+        this.move = move;
+        jumpedCheckers = game.move(move);
+        workAround(game, max, currentDepth);
+    }
+
+    public Node(Game game, boolean max, int currentDepth){
+        workAround(game, max, currentDepth);
+    }
+
+    //A work-around to allow me to use a constructor within another without putting it on the first line.
+    public void workAround(Game game, boolean max, int currentDepth){
         bestMove  = new ArrayList<>();
-        max = maxMin;
-        parent = par;
-        move = causingMove;
+        this.max = max;
         jumpedCheckers = new ArrayList<>();
         this.currentDepth = currentDepth;
         //TODO check the check that's about to move to see if it is a king.
-        jumpedCheckers = game.move(move);
         //TODO Check for pruning here, for if children are possible. This means the hueristic will have to run here too. No it does not
         if(this.currentDepth <= maxDepth) {
             if (game.forcedJump()) {
-                generateStepChildren(game);
-            } else {
                 generateJumpChildren(game);
+            } else {
+                generateStepChildren(game);
             }
+        }
+        else{
+            value = game.heuristic();
         }
     }
 
+
+
     private boolean isBetterValue(int newValue){
-        return (max && newValue > bestMoveValue) || (!max && newValue < bestMoveValue);
+        return (max && newValue > value) || (!max && newValue < value);
     }
 
     //Handles when this node is backtracked to.
+    //TODO should undo its child's move, not its own.
     private void backTracked(Game game){
         if(isBetterValue(child.value)){
+            value = child.value;
             bestMove = child.move;
         }
         //undo step
         if(Math.abs(child.bestMove.get(0) - child.bestMove.get(2)) == 1){
-            game.undoStep(move);
+            game.undoStep(child.move);
         }else{ //undo jump
-            game.undoJump(move, jumpedCheckers);
+            game.undoJump(child.move, jumpedCheckers);
         }
         // remove the child that just returned. May not be necessary
         child = null;
