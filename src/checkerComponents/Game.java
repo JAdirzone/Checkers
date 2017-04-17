@@ -72,19 +72,23 @@ public class Game {
 
     //TODO Add check for "King Me" here?
     //Input must be validated before calling this.
-    private void subJump(int column, int row, int targetColumn, int targetRow){
+    private Checker subJump(int column, int row, int targetColumn, int targetRow){
         Checker movingChecker = board[column - 1][row - 1];
         board[column - 1][row - 1] = EMPTY;
         board[targetColumn - 1][targetRow - 1] = movingChecker;
+        Checker result = board[(targetColumn - column) / 2 + column - 1][(targetRow - row) / 2 + row - 1];
         board[(targetColumn - column) / 2 + column - 1][(targetRow - row) / 2 + row - 1] = EMPTY;
+        return result;
     }
 
     //TODO Add check for "King me" here?
     //Input must be validated before calling this.
-    public void jump(ArrayList<Integer> jump){
+    public ArrayList<Checker> jump(ArrayList<Integer> jump){
+        ArrayList<Checker> jumpedCheckers = new ArrayList<>();
         for(int i = 4; i <= jump.size(); i += 2){
-            subJump(jump.get(i - 4), jump.get(i - 3), jump.get(i - 2), jump.get(i - 1));
+            jumpedCheckers.add(subJump(jump.get(i - 4), jump.get(i - 3), jump.get(i - 2), jump.get(i - 1)));
         }
+        return jumpedCheckers;
     }
 
     private boolean checkDark(int column, int row){

@@ -1,6 +1,7 @@
 package controlComponents;
 
 import checkerComponents.Game;
+import search.Node;
 
 import java.util.ArrayList;
 
@@ -16,9 +17,10 @@ public class ComputerPlayer implements Player {
         this.isWhitePlayer = isWhitePlayer;
     }
 
-    //TODO
+
     public ArrayList<Integer> getMove(){
-        return new ArrayList<>();
+        Node tree = new Node(game, null, null, true, 0);
+        return tree.getBestMove();
     }
 
     public String getColorString(){

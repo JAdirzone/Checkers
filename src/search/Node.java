@@ -2,6 +2,7 @@ package search;
 
 import checkerComponents.Checker;
 import checkerComponents.Game;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import java.util.ArrayList;
 
@@ -13,29 +14,33 @@ public class Node {
     private static int maxDepth = 5;
     private Node parent;
     //private ArrayList<Node> children; //I think it only ever has one child. If that is the case, switch
-    private child;
+    private Node child; //should replace children
     private ArrayList<Integer> move; //The move that this node represents
     private ArrayList<Integer> bestMove;
-    private int bestMoveValue;
+    private int bestMoveValue; //Best move value and value are the same thing.
     private int value;
     private boolean max; //Whether this node is trying to maximize of minimize. Max is the black player's move
     private ArrayList<Checker> jumpedCheckers;//The checkers that were jumped in this node's move, in the order they were jumped
+    private boolean movedKing;
+    private int currentDepth;
 
     //board should be a copy of the board actually being used by the game.
-    public Node(Game game, Node par, ArrayList<Integer> causingMove, boolean maxMin){
-        children  = new ArrayList<>();
+    public Node(Game game, Node par, ArrayList<Integer> causingMove, boolean maxMin, int currentDepth){
+        //children  = new ArrayList<>();
         bestMove  = new ArrayList<>();
         max = maxMin;
         parent = par;
         move = causingMove;
         jumpedCheckers = new ArrayList<>();
-        //TODO Check for pruning here, for if children are possible. This means the hueristic will have to run here too.
-                                                                    //No it does not
-        if(game.forcedJump()){
-            generateStepChildren(game);
-        }
-        else{
-            generateJumpChildren(game);
+        this.currentDepth = currentDepth;
+        //TODO perform the move that this node represents here
+        //TODO Check for pruning here, for if children are possible. This means the hueristic will have to run here too. No it does not
+        if(this.currentDepth <= maxDepth) {
+            if (game.forcedJump()) {
+                generateStepChildren(game);
+            } else {
+                generateJumpChildren(game);
+            }
         }
     }
 
@@ -45,21 +50,21 @@ public class Node {
 
     //Handles when this node is backtracked to.
     private void backTracked(Game game){
-        if(isBetterValue(children.get(children.size() - 1).value)){
-            bestMove = children.get(children.size() - 1).bestMove;
+        if(isBetterValue(child.value)){
+            bestMove = child.move;
         }
         //undo step
-        if(Math.abs(children.get(children.size() - 1).bestMove.get(0) - children.get(children.size() - 1).bestMove.get(2)) == 1){
+        if(Math.abs(child.bestMove.get(0) - child.bestMove.get(2)) == 1){
             game.undoStep(move);
         }else{ //undo jump
             game.undoJump(move, jumpedCheckers);
         }
-        //TODO remove the child that just returned.
-
+        // remove the child that just returned. May not be necessary
+        child = null;
     }
 
     private void branch(Game game, ArrayList<Integer> nextMove){
-        children.add(new Node(game, this, nextMove, !max));
+        child = new Node(game, this, nextMove, !max, currentDepth + 1);
         backTracked(game);
     }
 
@@ -111,12 +116,40 @@ public class Node {
             int preCol = row % 2;
             for(int column = preCol; column <= 7; column += 2) {
                 if (game.checkerCheck(column + 1, row + 1, !max)) {
-                    JumpNode head = new JumpNode(game, column + 1, row + 1, null); //Potential Problem wiih Null?
-                    while (head.hasChildren()) {
-                        children.add(new Node(game, this, head.nextFullNode(), !max)); //TODO switch to branch function
+                    if(game.checkSubJump(column + 1, row + 1, column + 3, row + 3)){
+                        JumpNodeHead head = new JumpNodeHead(game, column + 1, row + 1,
+                                column + 3, row + 3);
+                        while (head.hasChildren()) {
+                            branch(game, head.nextFullNode());
+                        }
+                    }
+                    if(game.checkSubJump(column + 1, row + 1, column + 3, row - 1)){
+                        JumpNodeHead head = new JumpNodeHead(game, column + 1, row + 1,
+                                column + 3, row - 1);
+                        while (head.hasChildren()) {
+                            branch(game, head.nextFullNode());
+                        }
+                    }
+                    if(game.checkSubJump(column + 1, row + 1, column - 1, row + 3)){
+                        JumpNodeHead head = new JumpNodeHead(game, column + 1, row + 1,
+                                column - 1, row + 3);
+                        while (head.hasChildren()) {
+                            branch(game, head.nextFullNode());
+                        }
+                    }
+                    if(game.checkSubJump(column + 1, row + 1, column - 1, row - 1)){
+                        JumpNodeHead head = new JumpNodeHead(game, column + 1, row + 1,
+                                column - 1, row - 1);
+                        while (head.hasChildren()) {
+                            branch(game, head.nextFullNode());
+                        }
                     }
                 }
             }
         }
+    }
+
+    public ArrayList<Integer> getBestMove() {
+        return bestMove;
     }
 }

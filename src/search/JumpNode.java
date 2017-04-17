@@ -1,41 +1,46 @@
 package search;
 
+import checkerComponents.Checker;
 import checkerComponents.Game;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 
 /**
  * Created by Jay on 4/15/2017.
  */
 public class JumpNode {
-    private int column;
-    private int row;
+    protected int column;
+    protected int row;
     private JumpNode parent;
     private LinkedList<JumpNode> children;
+    protected Checker jumpedChecker;
 
     public JumpNode(Game game, int column, int row, JumpNode parent){
         this.column = column;
         this.row = row;
         this.parent = parent;
         this.children = new LinkedList<>();
+        game.move(new ArrayList<>(Arrays.asList(parent.column, parent.row, column, row)));
         generateChildren(game);
     }
-
-    private void generateChildren(Game game){
+    //game must be a COPY of the one used by the main Nodes?
+    protected void generateChildren(Game game){
         if(game.checkSubJump(column, row, column + 2, row + 2)){
-            children.add(new JumpNode(game, column + 2, row + 2, this));
+            branch(game, column + 2, row + 2);
         }
         if(game.checkSubJump(column, row, column + 2, row - 2)){
-            children.add(new JumpNode(game, column + 2, row - 2, this));
+            branch(game, column + 2, row - 2);
         }
         if(game.checkSubJump(column, row, column - 2, row + 2)){
-            children.add(new JumpNode(game, column - 2, row + 2, this));
+            branch(game, column - 2, row + 2);
         }
         if(game.checkSubJump(column, row, column - 2, row - 2)){
-            children.add(new JumpNode(game, column - 2, row - 2, this));
+            branch(game, column - 2, row - 2);
         }
     }
+
 
     public ArrayList<Integer> nextFullNode(){
         if(!children.isEmpty()){
@@ -54,6 +59,17 @@ public class JumpNode {
     public boolean hasChildren(){
         return !children.isEmpty();
     }
+
+    private void branch(Game game, int column, int row){
+        children.add(new JumpNode(game, column, row, this));
+        backTracked(game);
+    }
+
+    private void backTracked(Game game){
+        game.undoSubJump(column, row, parent.column, parent.row, jumpedChecker);
+    }
+
+
 
 
 
