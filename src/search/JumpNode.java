@@ -7,9 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 
-/**
- * Created by Jay on 4/15/2017.
- */
+
 public class JumpNode {
     protected int column;
     protected int row;
@@ -22,7 +20,8 @@ public class JumpNode {
         this.row = row;
         this.parent = parent;
         this.children = new LinkedList<>();
-        game.move(new ArrayList<>(Arrays.asList(parent.column, parent.row, column, row)));
+        //TODO check if the checker that is about to move is a king
+        jumpedChecker = game.subJump(parent.column, parent.row, column, row);
         generateChildren(game);
     }
     //game must be a COPY of the one used by the main Nodes?
@@ -68,12 +67,5 @@ public class JumpNode {
     private void backTracked(Game game){
         game.undoSubJump(column, row, parent.column, parent.row, jumpedChecker);
     }
-
-
-
-
-
-
-
 
 }

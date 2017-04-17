@@ -54,25 +54,26 @@ public class Game {
     }
 
     //Input must be validated before calling this.
-    public void move(ArrayList<Integer> move){
+    public ArrayList<Checker> move(ArrayList<Integer> move){
         if(Math.abs(move.get(0) - move.get(1)) == 1){
-            step(move.get(0), move.get(1), move.get(2), move.get(3));
+            return step(move.get(0), move.get(1), move.get(2), move.get(3));
         } else{
-            jump(move);
+            return jump(move);
         }
     }
 
     //TODO Add check for "King Me"
     //Input must be validated before calling this.
-    public void step(int column, int row, int targetColumn, int targetRow){
+    public ArrayList<Checker> step(int column, int row, int targetColumn, int targetRow){
         Checker movingChecker = board[column - 1][row -1];
         board[column - 1][row - 1] = EMPTY;
         board[targetColumn - 1][targetRow - 1] = movingChecker;//Pass by value, or reference?
+        return new ArrayList<Checker>();
     }
 
     //TODO Add check for "King Me" here?
     //Input must be validated before calling this.
-    private Checker subJump(int column, int row, int targetColumn, int targetRow){
+    public Checker subJump(int column, int row, int targetColumn, int targetRow){
         Checker movingChecker = board[column - 1][row - 1];
         board[column - 1][row - 1] = EMPTY;
         board[targetColumn - 1][targetRow - 1] = movingChecker;
@@ -220,5 +221,44 @@ public class Game {
         }
     }
 
+    //Heuristic Below
+    public int heuristic(){
+        int result = 0;
+        for(int row = 0; row <= 7; row++){
+            int preCol = row % 2;
+            for(int column = preCol; column <= 7; column += 2){
+                if(board[column][row].isChecker()){
+                    result += evaluateChecker(column + 1, row + 1, board[column][row]);
+                }
+            }
+        }
+        return result;
+    }
+    //range 0-7, not 1-8
+    public int evaluateChecker(int column, int row, Checker checker){
+        int result = 0;
+        if(column == 0 && row % 2 == 0){
+            result += 100;
+        }
+        if(column == 7 && row % 2 == 1){
+            result += 100;
+        }
+        result += 10 * distanceFromBackRow(row, checker.isWhite());
+        if(checker.isKing()){
+            result = result * 3; //Maybe kings should be scored in a way that does not favor moving further from its start.
+        }
+        if(checker.isWhite()){
+            result = result * -1;
+        }
+        return result;
+    }
+
+    private int distanceFromBackRow(int row, boolean isWhite){
+        if(isWhite){
+            return row;
+        }else{
+            return 7 - row;
+        }
+    }
 }
 

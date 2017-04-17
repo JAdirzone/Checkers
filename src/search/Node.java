@@ -33,7 +33,8 @@ public class Node {
         move = causingMove;
         jumpedCheckers = new ArrayList<>();
         this.currentDepth = currentDepth;
-        //TODO perform the move that this node represents here
+        //TODO check the check that's about to move to see if it is a king.
+        jumpedCheckers = game.move(move);
         //TODO Check for pruning here, for if children are possible. This means the hueristic will have to run here too. No it does not
         if(this.currentDepth <= maxDepth) {
             if (game.forcedJump()) {

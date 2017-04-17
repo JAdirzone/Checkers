@@ -17,7 +17,8 @@ public class JumpNodeHead extends JumpNode{
         super(game, targetColumn, targetRow, null);
         this.originColumn = column;
         this.originRow = row;
-        game.move(new ArrayList<Integer>(Arrays.asList(column, row, targetColumn, targetRow)));
+        //TODO check if the checker that is about to move is a king
+        jumpedChecker = game.subJump(column, row, targetColumn, targetRow);
         generateChildren(game);
     }
 
