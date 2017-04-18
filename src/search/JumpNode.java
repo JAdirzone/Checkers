@@ -12,7 +12,7 @@ public class JumpNode {
     protected int column;
     protected int row;
     private JumpNode parent;
-    private LinkedList<JumpNode> children;
+    protected LinkedList<JumpNode> children;
     protected Checker jumpedChecker;
 
     public JumpNode(Game game, int column, int row, JumpNode parent){
@@ -23,7 +23,13 @@ public class JumpNode {
         //TODO check if the checker that is about to move is a king
         jumpedChecker = game.subJump(parent.column, parent.row, column, row);
         generateChildren(game);
+        game.undoSubJump(column, row, parent.column, parent.row, jumpedChecker);
     }
+
+    public JumpNode(){
+        //To satisfy java's demand for a default constructor
+    }
+
     //game must be a COPY of the one used by the main Nodes?
     protected void generateChildren(Game game){
         if(game.checkSubJump(column, row, column + 2, row + 2)){
@@ -40,18 +46,19 @@ public class JumpNode {
         }
     }
 
-
+    //TODO Add one of these to JumpNodeHead to have it add the origin coords?
     public ArrayList<Integer> nextFullNode(){
+        ArrayList<Integer> result = new ArrayList<>();
+        result.add(column);
+        result.add(row);
+
         if(!children.isEmpty()){
-            ArrayList<Integer> result = children.get(0).nextFullNode();
-            result.add(column, row);
+            result.addAll(children.get(0).nextFullNode());
             if(children.get(0).children.isEmpty()){
                 children.remove(0);
             }
             return result;
         }
-        ArrayList<Integer> result = new ArrayList<>();
-        result.add(column, row);
         return result;
     }
 
@@ -61,11 +68,11 @@ public class JumpNode {
 
     private void branch(Game game, int column, int row){
         children.add(new JumpNode(game, column, row, this));
-        backTracked(game);
+        //backTracked(game);
     }
 
-    private void backTracked(Game game){
-        game.undoSubJump(column, row, parent.column, parent.row, jumpedChecker);
-    }
+    //private void backTracked(Game game){
+        //game.undoSubJump(column, row, parent.column, parent.row, jumpedChecker);
+    //}
 
 }
