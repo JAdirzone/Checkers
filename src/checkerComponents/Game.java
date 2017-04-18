@@ -68,11 +68,11 @@ public class Game {
     public ArrayList<Checker> step(int column, int row, int targetColumn, int targetRow){
         Checker movingChecker = board[column - 1][row -1];
         board[column - 1][row - 1] = EMPTY;
-        System.out.println("&&&&&& "+ column + "," + row + "," + targetColumn + "," + targetRow);
+        //System.out.println("&&&&&& "+ column + "," + row + "," + targetColumn + "," + targetRow);
         board[targetColumn - 1][targetRow - 1] = movingChecker;//Pass by value, or reference?
         whiteTurn = !whiteTurn;
         System.out.println("step " + column + "," + row + " to " + targetColumn + "," + targetRow);
-        System.out.println("++++++++\n" + toString());
+        //System.out.println("++++++++\n" + toString());
         return new ArrayList<Checker>();
 
     }
@@ -85,8 +85,8 @@ public class Game {
         board[targetColumn - 1][targetRow - 1] = movingChecker;
         Checker result = board[(targetColumn - column) / 2 + column - 1][(targetRow - row) / 2 + row - 1];
         board[(targetColumn - column) / 2 + column - 1][(targetRow - row) / 2 + row - 1] = EMPTY;
-        System.out.println("subjump " + column + "," + row + " to " + targetColumn + "," + targetRow);
-        System.out.println("++++++++\n" + toString());
+        //System.out.println("subjump " + column + "," + row + " to " + targetColumn + "," + targetRow);
+        //System.out.println("++++++++\n" + toString());
         return result;
     }
 
@@ -98,7 +98,9 @@ public class Game {
             jumpedCheckers.add(subJump(jump.get(i - 4), jump.get(i - 3), jump.get(i - 2), jump.get(i - 1)));
         }
         whiteTurn = !whiteTurn;
+        System.out.println("jumped " + jump.toString());
         return jumpedCheckers;
+
     }
 
     private boolean checkDark(int column, int row){
@@ -210,15 +212,15 @@ public class Game {
         board[targetColumn - 1][targetRow - 1] = board[column - 1][row - 1];
         board[column - 1][row - 1] = EMPTY;
         board[(targetColumn - column) / 2 + column - 1][(targetRow - row) / 2 + row - 1] = jumpedChecker;
-        System.out.println("undo subjump " + column + "," + row + " to " + targetColumn + "," + targetRow);
-        System.out.println("*******\n" + toString());
+        //System.out.println("undo subjump " + column + "," + row + " to " + targetColumn + "," + targetRow);
+        //System.out.println("*******\n" + toString());
     }
     //TODO need to be able to undo becoming a king
     public void undoSubStep(int column, int row, int targetColumn, int targetRow){
         board[targetColumn - 1][targetRow - 1] = board[column - 1][row - 1];
         board[column - 1][row - 1] = EMPTY;
-        System.out.println("undo " + column + "," + row + " to " + targetColumn + "," + targetRow);
-        System.out.println("*******\n" + toString());
+        //System.out.println("undo step " + column + "," + row + " to " + targetColumn + "," + targetRow);
+        //System.out.println("*******\n" + toString());
     }
 
     public void undoStep(ArrayList<Integer> move){
@@ -227,10 +229,10 @@ public class Game {
     }
 
     public void undoJump(ArrayList<Integer> move, ArrayList<Checker> jumpedCheckers){
-        int counter = 0;
-        for(int i = move.size() - 1; i <= 3; i -= 2){ //TODO, should i be >= 3, or some other value
-            undoSubJump(move.get(i - 1), move.get(i), move.get(i - 3), move.get(i - 2),
-                    jumpedCheckers.get(jumpedCheckers.size() - 1 - counter));
+        int counter = 1;
+        for(int i = move.size() - 4; i >= 0; i = i - 2){ //TODO, should i be >= 3, or some other value
+            undoSubJump(move.get(i + 2), move.get(i + 3), move.get(i), move.get(i + 1),
+                    jumpedCheckers.get(jumpedCheckers.size() - counter));
             counter++;
         }
         whiteTurn = !whiteTurn;

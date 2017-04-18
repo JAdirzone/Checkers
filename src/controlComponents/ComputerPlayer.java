@@ -20,7 +20,8 @@ public class ComputerPlayer implements Player {
 
     public ArrayList<Integer> getMove(){
         Node tree = new Node(game, true, 0);
-        return tree.getBestMove();
+        ArrayList<Integer> result = tree.getBestMove(); //TODO for debugging purposes. Condense
+        return result;
     }
 
     public String getColorString(){

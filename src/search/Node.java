@@ -26,7 +26,7 @@ public class Node {
         this.parent = parent;
         this.move = move;
         this.jumpedCheckers = game.move(move);
-        System.out.print(game.toString());
+        //System.out.print(game.toString());
         workAround(game, max, currentDepth);
     }
 
@@ -38,22 +38,28 @@ public class Node {
     public void workAround(Game game, boolean max, int currentDepth){
         bestMove  = new ArrayList<>();
         this.max = max;
-        jumpedCheckers = new ArrayList<>();
+        //jumpedCheckers = new ArrayList<>(); //THIS DAMN LINE
         this.currentDepth = currentDepth;
+        if(max){
+            value = Integer.MIN_VALUE;
+        }
+        else{
+            value = Integer.MAX_VALUE;
+        }
         //TODO check the check that's about to move to see if it is a king.
         //TODO Check for pruning here, for if children are possible. This means the hueristic will have to run here too. No it does not
         if(this.currentDepth <= maxDepth) {
             if (game.forcedJump()) {
-                System.out.println("Jumped");
+                //System.out.println("Jumped");
                 generateJumpChildren(game);
             } else {
-                System.out.println("Stepped");
+                //System.out.println("Stepped");
                 generateStepChildren(game);
             }
         }
         else{
             value = game.heuristic();
-            //System.out.println("Stall");
+            System.out.println("Stall");
         }
     }
 
