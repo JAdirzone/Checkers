@@ -22,9 +22,18 @@ public class Main {
         int turnNumber = 0;
         boolean playing =  true;
         while(playing){
+            game.setWhiteTurn(turnNumber % 2 == 0);
+            System.out.println(game.isWhiteTurn());
             System.out.println(game.toString());
             game.move(players[turnNumber % 2].getMove());
-            playing = !game.currentPlayerWins();
+            //playing = !game.currentPlayerWins(); //Replace this line.
+            if(!game.playerCanMove(true)){
+                System.out.println("The white player wins!");
+                playing = false;
+            }if(!game.playerCanMove(false)){
+                System.out.println("The black player wins!");
+                playing = false;
+            }
             //game.nextTurn();
             turnNumber++;
         }
@@ -49,6 +58,8 @@ public class Main {
             return -1;
         }
     }
+
+
 
 
 }

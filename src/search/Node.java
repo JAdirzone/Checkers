@@ -26,8 +26,17 @@ public class Node {
         this.parent = parent;
         this.move = move;
         this.jumpedCheckers = game.move(move);
+        this.max = max; //I know this is also set in the sub-constructor, but I can change it later
         //System.out.print(game.toString());
-        workAround(game, max, currentDepth);
+        if(!game.playerCanMove(false)){
+            value = -1000000; //Make sure this is low enough
+        }
+        else if(!game.playerCanMove(true)){
+            value = 1000000;
+        }
+        else {
+            workAround(game, max, currentDepth);
+        }
     }
 
     public Node(Game game, boolean max, int currentDepth){

@@ -167,6 +167,7 @@ public class Game {
         return whiteTurn;
     }
 
+    //TODO replace
     public boolean currentPlayerWins(){
         for(int row = 0; row <= 7; row++){
             int preCol = row % 2;
@@ -178,6 +179,21 @@ public class Game {
         }
         return true;
     }
+
+    public boolean playerCanMove(boolean isWhite){
+        for(int row = 0; row <= 7; row++){
+            int preCol = row % 2;
+            for(int column = preCol; column <= 7; column += 2){
+                if(board[column][row].isChecker() && board[column][row].isWhite() == isWhite){
+                    if(availableMove(column, row)){
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
 
     public boolean forcedJump(){
         for(int row = 0; row <= 7; row++){
@@ -200,6 +216,19 @@ public class Game {
                 || checkSubJump(column, row,column - 2, row + 2)
                 || checkSubJump(column, row,column - 2, row - 2);
     }
+
+    public boolean availableStep(int column, int row){
+        return checkSubJump(column, row, column + 2, row + 2)
+                || checkSubJump(column, row, column + 2, row - 2)
+                || checkSubJump(column, row, column - 2, row + 2)
+                || checkSubJump(column, row, column - 2, row - 2);
+
+    }
+
+    public boolean availableMove(int column, int row){
+        return availableJump(column, row) || availableStep(column, row);
+    }
+
 
     public boolean checkerCheck(int column, int row, boolean isWhite){
         return board[column - 1][row - 1].isChecker() && board[column - 1][row - 1].isWhite() == isWhite;
@@ -238,6 +267,14 @@ public class Game {
         whiteTurn = !whiteTurn;
 
     }
+
+    //For some reason, the AI isn't putting it back to the other player's turn when it's done. quick fix.
+    public void setWhiteTurn(boolean isWhiteTurn){
+        this.whiteTurn = isWhiteTurn ;
+    }
+
+
+
 
     //Heuristic Below
     public int heuristic(){
