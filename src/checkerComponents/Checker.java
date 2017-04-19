@@ -1,8 +1,6 @@
 package checkerComponents;
 
-/**
- * Created by Jay on 3/22/2017.
- */
+
 public enum Checker {
     BLACK(false, false),
     WHITE(true, false),

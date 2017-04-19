@@ -7,10 +7,12 @@ import java.util.Arrays;
 import java.util.LinkedList;
 
 /**
- * Created by Jay on 4/16/2017.
+ * The head of a tree of jump nodes.
  */
 public class JumpNodeHead extends JumpNode{
 
+    //Because this node must represent a full jump itself (unlike regular JumpNodes, which rely on their parent to
+    //provide their origin coordinates), these variables are needed.
     private int originColumn;
     private int originRow;
 
@@ -20,7 +22,6 @@ public class JumpNodeHead extends JumpNode{
         this.originColumn = column;
         this.originRow = row;
         this.children = new LinkedList<>();
-        //TODO check if the checker that is about to move is a king
         boolean movedKing = game.isKing(column, row);
         jumpedChecker = game.subJump(column, row, targetColumn, targetRow);
         if(movedKing || !game.isKing(targetColumn, targetRow)) {
@@ -29,6 +30,10 @@ public class JumpNodeHead extends JumpNode{
         game.undoSubJump(targetColumn, targetRow, originColumn, originRow, jumpedChecker, !movedKing && game.isKing(targetColumn, targetRow)); //TODO just changed after dennis encountered bug
     }
 
+    /**
+     * @return An ArrayList of Integers representing a full move. Because of the possibility to double jump (or multi jump),
+     * this list will be at least four integers long, but could be longer.
+     */
     public ArrayList<Integer> nextFullNode(){
         ArrayList<Integer> result = new ArrayList<>();
         result.add(originColumn);
@@ -46,6 +51,10 @@ public class JumpNodeHead extends JumpNode{
         return result;
     }
 
+    /**
+     * Creates children for this node.
+     * @param game
+     */
     protected void generateChildren(Game game){
         if(game.checkSubJump(column, row, column + 2, row + 2, false)){
             branch(game, column + 2, row + 2);
@@ -60,9 +69,4 @@ public class JumpNodeHead extends JumpNode{
             branch(game, column - 2, row - 2);
         }
     }
-
-
-    //public void backTracked(Game game){
-        //game.undoSubJump(column, row, originColumn, originRow, jumpedChecker);
-    //}
 }

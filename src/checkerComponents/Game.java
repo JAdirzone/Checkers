@@ -1,6 +1,7 @@
 package checkerComponents;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import static checkerComponents.Checker.EMPTY;
 
@@ -341,12 +342,15 @@ public class Game {
     //range 0-7, not 1-8
     public int evaluateChecker(int column, int row, Checker checker){
         int result = 0;
-        if(column == 0 && row % 2 == 0){
-            result += 100;
-        }
-        if(column == 7 && row % 2 == 1){
-            result += 100;
-        }
+        //if(column == 0 && row % 2 == 0){
+        //    result += 1;
+        //}
+        //if(column == 7 && row % 2 == 1){
+        //    result += 1;
+        //}
+        //if(column == 6 && row == 6){//test
+        //    result -= 100000;
+        //}
         result += 10; //* distanceFromBackRow(row, checker.isWhite());
         if(checker.isKing()){
             result = result * 3; //Maybe kings should be scored in a way that does not favor moving further from its start.
@@ -354,7 +358,8 @@ public class Game {
         if(checker.isWhite()){
             result = result * -1;
         }
-        return result;
+        Random rand = new Random(); //test
+        return result;// + rand.nextInt(2);
     }
 
     private int distanceFromBackRow(int row, boolean isWhite){

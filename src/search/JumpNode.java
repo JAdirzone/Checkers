@@ -7,7 +7,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 
-
+/**
+ * A node on a tree that finds all of the possible jumps that a single piece can make.
+ * This is necessary because double jumps count as one move, and is used by Node to create its children.
+ * However, Node and JumpNode (paired with jumpNodeHead) are separate from one another.
+ * One is never the parent or child of the other. They form two separate tree structures.
+ */
 public class JumpNode {
     protected int column;
     protected int row;
@@ -32,10 +37,13 @@ public class JumpNode {
     }
 
     public JumpNode(){
-        //To satisfy java's demand for a default constructor
+        //To satisfy Java's demand for a default constructor
     }
 
-    //game must be a COPY of the one used by the main Nodes?
+    /**
+     * Creates children for this node.
+     * @param game
+     */
     protected void generateChildren(Game game){
         if(game.checkSubJump(column, row, column + 2, row + 2, true)){
             branch(game, column + 2, row + 2);
@@ -51,7 +59,10 @@ public class JumpNode {
         }
     }
 
-    //TODO Add one of these to JumpNodeHead to have it add the origin coords?
+    /**
+     * @return An ArrayList of Integers representing a move. Because of the possibility to double jump (or multi jump),
+     * this list will be atleast four integers long, but could be longer.
+     */
     public ArrayList<Integer> nextFullNode(){
         ArrayList<Integer> result = new ArrayList<>();
         result.add(column);
@@ -71,9 +82,16 @@ public class JumpNode {
         return !children.isEmpty();
     }
 
+    /**
+     * Creates a child for this node. The child will represent a single hop (not necessarily a full move because of
+     * double jumping) from tis node's column and row values to the position specified by the column and row values
+     * passed into this.
+     * @param game
+     * @param column column jumped to by the child node.
+     * @param row row jumped to by the child node.
+     */
     protected void branch(Game game, int column, int row){
         children.add(new JumpNode(game, column, row, this));
-        //backTracked(game);
     }
 
     //private void backTracked(Game game){

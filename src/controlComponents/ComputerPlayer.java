@@ -6,7 +6,7 @@ import search.Node;
 import java.util.ArrayList;
 
 /**
- * Created by Jay on 4/13/2017.
+ * The AI controlled player
  */
 public class ComputerPlayer implements Player {
     private Game game; //Reference to original game
@@ -17,7 +17,10 @@ public class ComputerPlayer implements Player {
         this.isWhitePlayer = isWhitePlayer;
     }
 
-
+    /**
+     * Creates and return the AI player's next move.
+     * @return
+     */
     public ArrayList<Integer> getMove(){
         Node tree = new Node(game, true, 0);
         ArrayList<Integer> result = tree.getBestMove(); //TODO for debugging purposes. Condense

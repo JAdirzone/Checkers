@@ -5,9 +5,7 @@ import checkerComponents.Game;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-/**
- * Created by Jay on 4/13/2017.
- */
+
 public class HumanPlayer implements Player {
     private Scanner scanner;
     private Game game;
@@ -19,10 +17,14 @@ public class HumanPlayer implements Player {
         this.isWhitePlayer = isWhitePlayer;
     }
 
+    /**
+     * Prompts the human player for a move. Continues until it gets valid input.
+     * @return A move represented by an ArrayList of Integers.
+     */
     public ArrayList<Integer> getMove(){
         System.out.println("Input your move.");
         String[] input = scanner.next().split(",");
-        if(input.length % 2 == 0 || input.length >= 4){
+        if(input.length % 2 == 0 && input.length >= 4){ //NOTE change to AND
             try {
                 ArrayList<Integer> result =  new ArrayList<>();
                 for (String string : input) {
