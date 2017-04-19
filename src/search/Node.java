@@ -6,11 +6,9 @@ import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import java.util.ArrayList;
 
-/**
- * Created by Jay on 4/15/2017.
- */
+
 public class Node {
-    private static int maxDepth = 6;
+    private static int maxDepth = 10;
     private Node parent;
     private Node child; //should replace children
     private ArrayList<Integer> move; //The move that this node represents
@@ -20,6 +18,8 @@ public class Node {
     private ArrayList<Checker> jumpedCheckers;//The checkers that were jumped in this node's move, in the order they were jumped
     private boolean movedKing;
     private int currentDepth;
+    private boolean rated; //For pruning
+    private boolean pruned; //If a node is pruned, it can no longer create children.
 
     //board should be a copy of the board actually being used by the game.
     public Node(Game game, Node parent, ArrayList<Integer> move, boolean max, int currentDepth){
@@ -32,9 +32,11 @@ public class Node {
         //System.out.print(game.toString());
         if(!game.playerCanMove(false)){
             value = -1000000; //Make sure this is low enough
+            rated = true;
         }
         else if(!game.playerCanMove(true)){
             value = 1000000;
+            rated = true;
         }
         else {
             workAround(game, max, currentDepth);
@@ -49,6 +51,8 @@ public class Node {
     public void workAround(Game game, boolean max, int currentDepth){
         bestMove  = new ArrayList<>();
         this.max = max;
+        this.rated = false;
+        this.pruned = false;
         //jumpedCheckers = new ArrayList<>(); //THIS DAMN LINE
         this.currentDepth = currentDepth;
         if(max){
@@ -70,6 +74,7 @@ public class Node {
         }
         else{
             value = game.heuristic();
+            rated = true;
             //System.out.println("value " + value + " depth " + currentDepth);
             //System.out.println("Stall");
         }
@@ -91,6 +96,8 @@ public class Node {
             //System.out.println("max:" + max + " took " + child.value + " over " + value + " depth " + currentDepth);
             value = child.value;
             bestMove = child.move;
+            pruned = shouldPrune(value);
+            System.out.println(pruned);
         }
         //undo step
         if(Math.abs(child.move.get(0) - child.move.get(2)) == 1){
@@ -124,7 +131,7 @@ public class Node {
                     System.out.println("col " + column);
                 }
                 if(game.checkerCheck(column + 1, row + 1, !max)) {
-                    if(game.checkSubStep(column + 1, row + 1, column + 2, row + 2)){
+                    if(!pruned && game.checkSubStep(column + 1, row + 1, column + 2, row + 2)){
                         if(currentDepth == 0) {
                             System.out.println("Generated child from depth 0 for " + (column + 1) + "," + (row + 1) + game.isWhiteTurn());
                         }
@@ -135,7 +142,7 @@ public class Node {
                         nextMove.add(row + 2);
                         branch(game, nextMove);
                     }
-                    if(game.checkSubStep(column + 1, row + 1, column + 2, row)){
+                    if(!pruned && game.checkSubStep(column + 1, row + 1, column + 2, row)){
                         if(currentDepth == 0) {
                             System.out.println("Generated child from depth 0 for " + (column + 1) + "," + (row + 1) + game.isWhiteTurn());
                         }
@@ -146,7 +153,7 @@ public class Node {
                         nextMove.add(row);
                         branch(game, nextMove);
                     }
-                    if(game.checkSubStep(column + 1, row + 1, column, row + 2)){
+                    if(!pruned && game.checkSubStep(column + 1, row + 1, column, row + 2)){
                         if(currentDepth == 0) {
                             System.out.println("Generated child from depth 0 for " + (column + 1) + "," + (row + 1) + game.isWhiteTurn());
                         }
@@ -157,7 +164,7 @@ public class Node {
                         nextMove.add(row + 2);
                         branch(game, nextMove);
                     }
-                    if(game.checkSubStep(column + 1, row + 1, column, row)){
+                    if(!pruned && game.checkSubStep(column + 1, row + 1, column, row)){
                         if(currentDepth == 0) {
                             System.out.println("Generated child from depth 0 for " + (column + 1) + "," + (row + 1) + game.isWhiteTurn());
                         }
@@ -179,7 +186,7 @@ public class Node {
             int preCol = row % 2;
             for(int column = preCol; column <= 7; column += 2) {
                 if (game.checkerCheck(column + 1, row + 1, !max)) {
-                    if(game.checkSubJump(column + 1, row + 1, column + 3, row + 3, false)){
+                    if(!pruned && game.checkSubJump(column + 1, row + 1, column + 3, row + 3, false)){
                         JumpNodeHead head = new JumpNodeHead(game, column + 1, row + 1,
                                 column + 3, row + 3);
                         branch(game, head.nextFullNode());
@@ -187,7 +194,7 @@ public class Node {
                             branch(game, head.nextFullNode());
                         }
                     }
-                    if(game.checkSubJump(column + 1, row + 1, column + 3, row - 1, false)){
+                    if(!pruned && game.checkSubJump(column + 1, row + 1, column + 3, row - 1, false)){
                         JumpNodeHead head = new JumpNodeHead(game, column + 1, row + 1,
                                 column + 3, row - 1);
                         branch(game, head.nextFullNode());
@@ -195,7 +202,7 @@ public class Node {
                             branch(game, head.nextFullNode());
                         }
                     }
-                    if(game.checkSubJump(column + 1, row + 1, column - 1, row + 3, false)){
+                    if(!pruned && game.checkSubJump(column + 1, row + 1, column - 1, row + 3, false)){
                         JumpNodeHead head = new JumpNodeHead(game, column + 1, row + 1,
                                 column - 1, row + 3);
                         branch(game, head.nextFullNode());
@@ -203,7 +210,7 @@ public class Node {
                             branch(game, head.nextFullNode());
                         }
                     }
-                    if(game.checkSubJump(column + 1, row + 1, column - 1, row - 1, false)){
+                    if(!pruned && game.checkSubJump(column + 1, row + 1, column - 1, row - 1, false)){
                         JumpNodeHead head = new JumpNodeHead(game, column + 1, row + 1,
                                 column - 1, row - 1);
                         branch(game, head.nextFullNode());
@@ -215,6 +222,13 @@ public class Node {
             }
         }
     }
+
+    private boolean shouldPrune(int newValue){
+        return (currentDepth > 0
+                &&((!max && parent.rated && parent.value >= newValue)
+                || (max && parent.rated && parent.value <= newValue)));
+    }
+
 
     public ArrayList<Integer> getBestMove() {
         return bestMove;
