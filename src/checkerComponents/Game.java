@@ -124,7 +124,7 @@ public class Game {
                 && Math.abs(targetRow - row) == 1;
     }
 
-    public boolean checkSubJump(int column, int row, int targetColumn, int targetRow){
+    public boolean checkSubJump(int column, int row, int targetColumn, int targetRow, boolean doubleJump){
         return checkDark(column, row)
                 && checkDark(targetColumn, targetRow)
                 && board[column - 1][row - 1].isChecker()
@@ -132,7 +132,7 @@ public class Game {
                 && board[targetColumn - 1][targetRow - 1] == EMPTY
                 && Math.abs(targetColumn - column) == 2
                 && Math.abs(targetRow - row) == 2
-                && (movingForward(row, targetRow) || board[column - 1][row - 1].isKing())
+                && (movingForward(row, targetRow) || board[column - 1][row - 1].isKing() || doubleJump)
                 && board[(targetColumn - column) / 2 + column - 1][(targetRow - row) / 2 + row - 1].isChecker()
                 && board[(targetColumn - column) / 2 + column - 1][(targetRow - row) / 2 + row - 1].isWhite() != whiteTurn;
     }
@@ -143,22 +143,24 @@ public class Game {
 
     public boolean checkJump(ArrayList<Integer> jump){
         boolean crownedKing = false;
+        boolean doubleJump = false;
         for(int i = 4; i <= jump.size(); i += 2){
-            if(!checkSubJump(jump.get(i - 4), jump.get(i - 3), jump.get(i - 2), jump.get(i - 1)) || crownedKing){
+            if(!checkSubJump(jump.get(i - 4), jump.get(i - 3), jump.get(i - 2), jump.get(i - 1), doubleJump) || crownedKing){
                 return false;
             }if(distanceFromBackRow(jump.get(i - 1) - 1, board[jump.get(0) - 1][jump.get(1) - 1].isWhite()) == 7){
                 crownedKing = true;
             }
+            doubleJump = true;
         }
         return !checkSubJump(jump.get(jump.size() - 2), jump.get(jump.size() - 1),
-                    jump.get(jump.size() - 2) + 2, jump.get(jump.size() - 1) + 2)
+                    jump.get(jump.size() - 2) + 2, jump.get(jump.size() - 1) + 2, true)
                 && !checkSubJump(jump.get(jump.size() - 2), jump.get(jump.size() - 1),
-                    jump.get(jump.size() - 2) + 2, jump.get(jump.size() - 1) - 2)
+                    jump.get(jump.size() - 2) + 2, jump.get(jump.size() - 1) - 2, true)
                 && !checkSubJump(jump.get(jump.size() - 2), jump.get(jump.size() - 1),
-                    jump.get(jump.size() - 2) - 2, jump.get(jump.size() - 1) + 2)
+                    jump.get(jump.size() - 2) - 2, jump.get(jump.size() - 1) + 2, true)
                 &&
                  !checkSubJump(jump.get(jump.size() - 2), jump.get(jump.size() - 1),
-                    jump.get(jump.size() - 2) - 2, jump.get(jump.size() - 1) - 2);
+                    jump.get(jump.size() - 2) - 2, jump.get(jump.size() - 1) - 2, true);
     }
 
 
@@ -195,7 +197,9 @@ public class Game {
                     if(availableMove(column + 1, row + 1)){
                         return true;
                     }
+                    //System.out.println(availableMove(column, row) + " column :" + column + " row " + row);
                 }
+                //System.out.println(availableMove(column, row) + " column :" + column + " row " + row);
             }
         }
         return false;
@@ -270,12 +274,12 @@ public class Game {
 
     public void undoStep(ArrayList<Integer> move, boolean becameKing){
         undoSubStep(move.get(2), move.get(3), move.get(0), move.get(1), becameKing);
-        whiteTurn = !whiteTurn;
+        whiteTurn = !whiteTurn; //this may be the problem
     }
 
     public void undoJump(ArrayList<Integer> move, ArrayList<Checker> jumpedCheckers, boolean becameKing){
         int counter = 1;
-        for(int i = move.size() - 4; i >= 0; i = i - 2){ //TODO, should i be >= 3, or some other value
+        for(int i = move.size() - 4; i >= 0; i = i - 2){
             undoSubJump(move.get(i + 2), move.get(i + 3), move.get(i), move.get(i + 1),
                     jumpedCheckers.get(jumpedCheckers.size() - counter), becameKing); //Technically this "reverts king" every time but the outcome is the same.
             counter++;
@@ -300,10 +304,10 @@ public class Game {
                 && board[column - 1][row - 1].isChecker()
                 //&& board[column - 1][row - 1].isWhite() == whiteTurn
                 && board[targetColumn - 1][targetRow - 1] == Checker.EMPTY
-                && Math.abs(targetColumn - column) == 1
-                && (movingForward(row, targetRow) || board[column - 1][row -1].isKing())
-                && Math.abs(targetColumn - column) == 1
-                && Math.abs(targetRow - row) == 1;
+                && (Math.abs(targetColumn - column) == 1)
+                && (movingForward(row, targetRow) || board[column - 1][row - 1].isKing())
+                && (Math.abs(targetColumn - column) == 1)
+                && (Math.abs(targetRow - row) == 1);
     }
 
     //like checkSubJump but it does no care whose turn it is.

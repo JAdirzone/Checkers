@@ -46,6 +46,21 @@ public class JumpNodeHead extends JumpNode{
         return result;
     }
 
+    protected void generateChildren(Game game){
+        if(game.checkSubJump(column, row, column + 2, row + 2, false)){
+            branch(game, column + 2, row + 2);
+        }
+        if(game.checkSubJump(column, row, column + 2, row - 2, false)){
+            branch(game, column + 2, row - 2);
+        }
+        if(game.checkSubJump(column, row, column - 2, row + 2, false)){
+            branch(game, column - 2, row + 2);
+        }
+        if(game.checkSubJump(column, row, column - 2, row - 2, false)){
+            branch(game, column - 2, row - 2);
+        }
+    }
+
 
     //public void backTracked(Game game){
         //game.undoSubJump(column, row, originColumn, originRow, jumpedChecker);

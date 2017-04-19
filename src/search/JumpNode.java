@@ -37,16 +37,16 @@ public class JumpNode {
 
     //game must be a COPY of the one used by the main Nodes?
     protected void generateChildren(Game game){
-        if(game.checkSubJump(column, row, column + 2, row + 2)){
+        if(game.checkSubJump(column, row, column + 2, row + 2, true)){
             branch(game, column + 2, row + 2);
         }
-        if(game.checkSubJump(column, row, column + 2, row - 2)){
+        if(game.checkSubJump(column, row, column + 2, row - 2, true)){
             branch(game, column + 2, row - 2);
         }
-        if(game.checkSubJump(column, row, column - 2, row + 2)){
+        if(game.checkSubJump(column, row, column - 2, row + 2, true)){
             branch(game, column - 2, row + 2);
         }
-        if(game.checkSubJump(column, row, column - 2, row - 2)){
+        if(game.checkSubJump(column, row, column - 2, row - 2, true)){
             branch(game, column - 2, row - 2);
         }
     }
@@ -71,7 +71,7 @@ public class JumpNode {
         return !children.isEmpty();
     }
 
-    private void branch(Game game, int column, int row){
+    protected void branch(Game game, int column, int row){
         children.add(new JumpNode(game, column, row, this));
         //backTracked(game);
     }

@@ -26,7 +26,7 @@ public class Main {
             System.out.println(game.isWhiteTurn());
             System.out.println(game.toString());
             game.move(players[turnNumber % 2].getMove());
-            //playing = !game.currentPlayerWins(); //Replace this line.
+            playing = !game.currentPlayerWins(); //Replace this line.
             if(!game.playerCanMove(true)){
                 System.out.println("The black player wins!");
                 playing = false;

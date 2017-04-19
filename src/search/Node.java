@@ -10,7 +10,7 @@ import java.util.ArrayList;
  * Created by Jay on 4/15/2017.
  */
 public class Node {
-    private static int maxDepth = 4;
+    private static int maxDepth = 6;
     private Node parent;
     private Node child; //should replace children
     private ArrayList<Integer> move; //The move that this node represents
@@ -28,7 +28,7 @@ public class Node {
         //TODO is the checker about o move a king?
         movedKing = game.isKing(move.get(0), move.get(1));
         this.jumpedCheckers = game.move(move);
-        this.max = max; //I know this is also set in the sub-constructor, but I can change it later
+        this.max = max; //I know this is also set in the sub-constructor
         //System.out.print(game.toString());
         if(!game.playerCanMove(false)){
             value = -1000000; //Make sure this is low enough
@@ -70,7 +70,7 @@ public class Node {
         }
         else{
             value = game.heuristic();
-            System.out.println("value " + value + " depth " + currentDepth);
+            //System.out.println("value " + value + " depth " + currentDepth);
             //System.out.println("Stall");
         }
     }
@@ -84,9 +84,11 @@ public class Node {
     //Handles when this node is backtracked to.
     //TODO should undo its child's move, not its own.
     private void backTracked(Game game){
-        System.out.println("Backtracked");
+
+        //test
+        //System.out.println("Backtracked from considering " + (child.move.get(2) - child.move.get(0)) + " " + (child.move.get(3) - child.move.get(1)));
         if(isBetterValue(child.value)){
-            System.out.println("max:" + max + " took " + child.value + " over " + value + " depth " + currentDepth);
+            //System.out.println("max:" + max + " took " + child.value + " over " + value + " depth " + currentDepth);
             value = child.value;
             bestMove = child.move;
         }
@@ -100,7 +102,7 @@ public class Node {
         }
         // remove the child that just returned. May not be necessary
         child = null;
-        game.nextTurn(); //technically switchturn
+        //game.nextTurn(); //technically switchturn THIS was problem, switching it may cause some more
     }
 
     private void branch(Game game, ArrayList<Integer> nextMove){
@@ -113,9 +115,19 @@ public class Node {
     private void generateStepChildren(Game game){
         for(int row = 0; row <= 7; row++){
             int preCol = row % 2;
+            if(currentDepth == 0) {
+                System.out.println(row);
+                System.out.println(game.isWhiteTurn());
+            }
             for(int column = preCol; column <= 7; column += 2){
+                if(currentDepth == 0) {
+                    System.out.println("col " + column);
+                }
                 if(game.checkerCheck(column + 1, row + 1, !max)) {
                     if(game.checkSubStep(column + 1, row + 1, column + 2, row + 2)){
+                        if(currentDepth == 0) {
+                            System.out.println("Generated child from depth 0 for " + (column + 1) + "," + (row + 1) + game.isWhiteTurn());
+                        }
                         ArrayList<Integer> nextMove = new ArrayList<>();
                         nextMove.add(column + 1);
                         nextMove.add(row + 1);
@@ -124,6 +136,9 @@ public class Node {
                         branch(game, nextMove);
                     }
                     if(game.checkSubStep(column + 1, row + 1, column + 2, row)){
+                        if(currentDepth == 0) {
+                            System.out.println("Generated child from depth 0 for " + (column + 1) + "," + (row + 1) + game.isWhiteTurn());
+                        }
                         ArrayList<Integer> nextMove = new ArrayList<>();
                         nextMove.add(column + 1);
                         nextMove.add(row + 1);
@@ -132,6 +147,9 @@ public class Node {
                         branch(game, nextMove);
                     }
                     if(game.checkSubStep(column + 1, row + 1, column, row + 2)){
+                        if(currentDepth == 0) {
+                            System.out.println("Generated child from depth 0 for " + (column + 1) + "," + (row + 1) + game.isWhiteTurn());
+                        }
                         ArrayList<Integer> nextMove = new ArrayList<>();
                         nextMove.add(column + 1);
                         nextMove.add(row + 1);
@@ -140,6 +158,10 @@ public class Node {
                         branch(game, nextMove);
                     }
                     if(game.checkSubStep(column + 1, row + 1, column, row)){
+                        if(currentDepth == 0) {
+                            System.out.println("Generated child from depth 0 for " + (column + 1) + "," + (row + 1) + game.isWhiteTurn());
+                        }
+                        //System.out.println("Considered down left");
                         ArrayList<Integer> nextMove = new ArrayList<>();
                         nextMove.add(column + 1);
                         nextMove.add(row + 1);
@@ -157,7 +179,7 @@ public class Node {
             int preCol = row % 2;
             for(int column = preCol; column <= 7; column += 2) {
                 if (game.checkerCheck(column + 1, row + 1, !max)) {
-                    if(game.checkSubJump(column + 1, row + 1, column + 3, row + 3)){
+                    if(game.checkSubJump(column + 1, row + 1, column + 3, row + 3, false)){
                         JumpNodeHead head = new JumpNodeHead(game, column + 1, row + 1,
                                 column + 3, row + 3);
                         branch(game, head.nextFullNode());
@@ -165,7 +187,7 @@ public class Node {
                             branch(game, head.nextFullNode());
                         }
                     }
-                    if(game.checkSubJump(column + 1, row + 1, column + 3, row - 1)){
+                    if(game.checkSubJump(column + 1, row + 1, column + 3, row - 1, false)){
                         JumpNodeHead head = new JumpNodeHead(game, column + 1, row + 1,
                                 column + 3, row - 1);
                         branch(game, head.nextFullNode());
@@ -173,7 +195,7 @@ public class Node {
                             branch(game, head.nextFullNode());
                         }
                     }
-                    if(game.checkSubJump(column + 1, row + 1, column - 1, row + 3)){
+                    if(game.checkSubJump(column + 1, row + 1, column - 1, row + 3, false)){
                         JumpNodeHead head = new JumpNodeHead(game, column + 1, row + 1,
                                 column - 1, row + 3);
                         branch(game, head.nextFullNode());
@@ -181,7 +203,7 @@ public class Node {
                             branch(game, head.nextFullNode());
                         }
                     }
-                    if(game.checkSubJump(column + 1, row + 1, column - 1, row - 1)){
+                    if(game.checkSubJump(column + 1, row + 1, column - 1, row - 1, false)){
                         JumpNodeHead head = new JumpNodeHead(game, column + 1, row + 1,
                                 column - 1, row - 1);
                         branch(game, head.nextFullNode());
