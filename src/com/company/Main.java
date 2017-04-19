@@ -23,7 +23,7 @@ public class Main {
         boolean playing =  true;
         while(playing){
             game.setWhiteTurn(turnNumber % 2 == 0);
-            System.out.println(game.isWhiteTurn());
+            //System.out.println(game.isWhiteTurn());
             System.out.println(game.toString());
             game.move(players[turnNumber % 2].getMove());
             playing = !game.currentPlayerWins(); //Replace this line.

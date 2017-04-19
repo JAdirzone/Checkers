@@ -11,7 +11,7 @@ import java.util.Random;
  * A Node represents a node in the tree that is being used to before the minimax algorithm.
  */
 public class Node {
-    private static int maxDepth = 8;
+    private static int maxDepth = 11;
     private Node parent;
     private Node child;
     private ArrayList<Integer> move; //The move that this node represents
@@ -28,7 +28,6 @@ public class Node {
     public Node(Game game, Node parent, ArrayList<Integer> move, boolean max, int currentDepth){
         this.parent = parent;
         this.move = move;
-        //TODO is the checker about o move a king?
         movedKing = game.isKing(move.get(0), move.get(1));
         this.jumpedCheckers = game.move(move);
         this.max = max; //I know this is also set in the sub-constructor
@@ -73,7 +72,7 @@ public class Node {
         }
         else{
             value = game.heuristic();
-            //rated = true; //TODO shouldn't this be uncomment? I don't actually think it effects anything because only parent nodes are checked to see if they are rated, but I guess it should be marked rated anyway.
+            //rated = true;
         }
     }
 
@@ -103,9 +102,6 @@ public class Node {
             rated = true;
             bestMove = child.move;
             pruned = shouldPrune(value);
-            //if(pruned){
-            //    System.out.println("Max: " + max + " value " + value + " parent value " + parent.value + " parent rated " + parent.rated);
-            //}
         }
         //undo step
         if(Math.abs(child.move.get(0) - child.move.get(2)) == 1){
@@ -136,19 +132,9 @@ public class Node {
     private void generateStepChildren(Game game){
         for(int row = 0; row <= 7; row++){
             int preCol = row % 2;
-            //if(currentDepth == 0) {
-                //System.out.println(row);
-                //System.out.println(game.isWhiteTurn());
-            //}
             for(int column = preCol; column <= 7; column += 2){
-                if(currentDepth == 0) {
-                    //System.out.println("col " + column);
-                }
                 if(game.checkerCheck(column + 1, row + 1, !max)) {
                     if(!pruned && game.checkSubStep(column + 1, row + 1, column + 2, row + 2)){
-                        if(currentDepth == 0) {
-                            //System.out.println("Generated child from depth 0 for " + (column + 1) + "," + (row + 1) + game.isWhiteTurn());
-                        }
                         ArrayList<Integer> nextMove = new ArrayList<>();
                         nextMove.add(column + 1);
                         nextMove.add(row + 1);
@@ -157,9 +143,6 @@ public class Node {
                         branch(game, nextMove);
                     }
                     if(!pruned && game.checkSubStep(column + 1, row + 1, column + 2, row)){
-                        //if(currentDepth == 0) {
-                        //    System.out.println("Generated child from depth 0 for " + (column + 1) + "," + (row + 1) + game.isWhiteTurn());
-                        //}
                         ArrayList<Integer> nextMove = new ArrayList<>();
                         nextMove.add(column + 1);
                         nextMove.add(row + 1);
@@ -168,9 +151,6 @@ public class Node {
                         branch(game, nextMove);
                     }
                     if(!pruned && game.checkSubStep(column + 1, row + 1, column, row + 2)){
-                        //if(currentDepth == 0) {
-                            //System.out.println("Generated child from depth 0 for " + (column + 1) + "," + (row + 1) + game.isWhiteTurn());
-                        //}
                         ArrayList<Integer> nextMove = new ArrayList<>();
                         nextMove.add(column + 1);
                         nextMove.add(row + 1);
@@ -179,10 +159,6 @@ public class Node {
                         branch(game, nextMove);
                     }
                     if(!pruned && game.checkSubStep(column + 1, row + 1, column, row)){
-                        //if(currentDepth == 0) {
-                            //System.out.println("Generated child from depth 0 for " + (column + 1) + "," + (row + 1) + game.isWhiteTurn());
-                        //}
-                        //System.out.println("Considered down left");
                         ArrayList<Integer> nextMove = new ArrayList<>();
                         nextMove.add(column + 1);
                         nextMove.add(row + 1);
@@ -252,12 +228,9 @@ public class Node {
             while (interestNode.parent != null) {
                 if ((!max && interestNode.max && interestNode.rated && interestNode.value >= newValue)
                         || (max && !interestNode.max && interestNode.rated && interestNode.value <= newValue)) {
-                    System.out.println("Max: " + max + " value " + value + " parent value " + interestNode.value + " ancestor max " + interestNode.max);
                     return true;
                 }
-                if(interestNode.currentDepth >= 0){
-                    interestNode = interestNode.parent;
-                }
+                interestNode = interestNode.parent;
 
             }
         }
