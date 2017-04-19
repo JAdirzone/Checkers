@@ -63,7 +63,6 @@ public class Game {
         }
     }
 
-    //TODO Add check for "King Me"
     //Input must be validated before calling this.
     public ArrayList<Checker> step(int column, int row, int targetColumn, int targetRow){
         Checker movingChecker = board[column - 1][row -1];
@@ -71,13 +70,14 @@ public class Game {
         //System.out.println("&&&&&& "+ column + "," + row + "," + targetColumn + "," + targetRow);
         board[targetColumn - 1][targetRow - 1] = movingChecker;//Pass by value, or reference?
         whiteTurn = !whiteTurn;
-        System.out.println("step " + column + "," + row + " to " + targetColumn + "," + targetRow);
+        //System.out.println("step " + column + "," + row + " to " + targetColumn + "," + targetRow);
         //System.out.println("++++++++\n" + toString());
-        return new ArrayList<Checker>();
-
+        if(distanceFromBackRow(targetRow - 1, board[targetColumn - 1][targetRow - 1].isWhite()) == 7){
+            board[targetColumn - 1][targetRow - 1] = board[targetColumn -1 ][targetRow - 1].kingMe();
+        }
+        return new ArrayList<>();
     }
 
-    //TODO Add check for "King Me" here?
     //Input must be validated before calling this.
     public Checker subJump(int column, int row, int targetColumn, int targetRow){
         Checker movingChecker = board[column - 1][row - 1];
@@ -87,10 +87,13 @@ public class Game {
         board[(targetColumn - column) / 2 + column - 1][(targetRow - row) / 2 + row - 1] = EMPTY;
         //System.out.println("subjump " + column + "," + row + " to " + targetColumn + "," + targetRow);
         //System.out.println("++++++++\n" + toString());
+        if(distanceFromBackRow(targetRow - 1, board[targetColumn - 1][targetRow - 1].isWhite()) == 7)//More efficient to check against the turn than the checker in the position's color
+        {
+            board[targetColumn - 1][targetRow - 1] = board[targetColumn - 1][targetRow - 1].kingMe();
+        }
         return result;
     }
 
-    //TODO Add check for "King me" here?
     //Input must be validated before calling this.
     public ArrayList<Checker> jump(ArrayList<Integer> jump){
         ArrayList<Checker> jumpedCheckers = new ArrayList<>();
@@ -98,7 +101,7 @@ public class Game {
             jumpedCheckers.add(subJump(jump.get(i - 4), jump.get(i - 3), jump.get(i - 2), jump.get(i - 1)));
         }
         whiteTurn = !whiteTurn;
-        System.out.println("jumped " + jump.toString());
+        //System.out.println("jumped " + jump.toString());
         return jumpedCheckers;
 
     }
@@ -139,9 +142,12 @@ public class Game {
     }
 
     public boolean checkJump(ArrayList<Integer> jump){
+        boolean crownedKing = false;
         for(int i = 4; i <= jump.size(); i += 2){
-            if(!checkSubJump(jump.get(i - 4), jump.get(i - 3), jump.get(i - 2), jump.get(i - 1))){
+            if(!checkSubJump(jump.get(i - 4), jump.get(i - 3), jump.get(i - 2), jump.get(i - 1)) || crownedKing){
                 return false;
+            }if(distanceFromBackRow(jump.get(i - 1) - 1, board[jump.get(0) - 1][jump.get(1) - 1].isWhite()) == 7){
+                crownedKing = true;
             }
         }
         return !checkSubJump(jump.get(jump.size() - 2), jump.get(jump.size() - 1),
@@ -150,7 +156,8 @@ public class Game {
                     jump.get(jump.size() - 2) + 2, jump.get(jump.size() - 1) - 2)
                 && !checkSubJump(jump.get(jump.size() - 2), jump.get(jump.size() - 1),
                     jump.get(jump.size() - 2) - 2, jump.get(jump.size() - 1) + 2)
-                && !checkSubJump(jump.get(jump.size() - 2), jump.get(jump.size() - 1),
+                &&
+                 !checkSubJump(jump.get(jump.size() - 2), jump.get(jump.size() - 1),
                     jump.get(jump.size() - 2) - 2, jump.get(jump.size() - 1) - 2);
     }
 
@@ -167,7 +174,7 @@ public class Game {
         return whiteTurn;
     }
 
-    //TODO replace
+    //Don't use
     public boolean currentPlayerWins(){
         for(int row = 0; row <= 7; row++){
             int preCol = row % 2;
@@ -185,7 +192,7 @@ public class Game {
             int preCol = row % 2;
             for(int column = preCol; column <= 7; column += 2){
                 if(board[column][row].isChecker() && board[column][row].isWhite() == isWhite){
-                    if(availableMove(column, row)){
+                    if(availableMove(column + 1, row + 1)){
                         return true;
                     }
                 }
@@ -211,17 +218,17 @@ public class Game {
 
     //TODO use in checkJump.
     public boolean availableJump(int column, int row){
-        return checkSubJump(column, row, column + 2, row + 2)
-                || checkSubJump(column, row,column + 2, row - 2)
-                || checkSubJump(column, row,column - 2, row + 2)
-                || checkSubJump(column, row,column - 2, row - 2);
+        return checkSubJumpTurnless(column, row, column + 2, row + 2)
+                || checkSubJumpTurnless(column, row,column + 2, row - 2)
+                || checkSubJumpTurnless(column, row,column - 2, row + 2)
+                || checkSubJumpTurnless(column, row,column - 2, row - 2);
     }
 
     public boolean availableStep(int column, int row){
-        return checkSubJump(column, row, column + 2, row + 2)
-                || checkSubJump(column, row, column + 2, row - 2)
-                || checkSubJump(column, row, column - 2, row + 2)
-                || checkSubJump(column, row, column - 2, row - 2);
+        return checkSubStepTurnless(column, row, column + 1, row + 1)
+                || checkSubStepTurnless(column, row, column + 1, row - 1)
+                || checkSubStepTurnless(column, row, column - 1, row + 1)
+                || checkSubStepTurnless(column, row, column - 1, row - 1);
 
     }
 
@@ -237,31 +244,40 @@ public class Game {
     //Must validate input before calling
     //target values represent the place being moved back to
     //TODO need to be able to undo becoming a king.
-    public void undoSubJump(int column, int row, int targetColumn, int targetRow, Checker jumpedChecker){
-        board[targetColumn - 1][targetRow - 1] = board[column - 1][row - 1];
+    public void undoSubJump(int column, int row, int targetColumn, int targetRow, Checker jumpedChecker, boolean becameKing){
+        if(becameKing){
+            board[targetColumn - 1][targetRow - 1] = board[column - 1][row - 1].revertKing();
+        }else {
+            board[targetColumn - 1][targetRow - 1] = board[column - 1][row - 1];
+        }
         board[column - 1][row - 1] = EMPTY;
         board[(targetColumn - column) / 2 + column - 1][(targetRow - row) / 2 + row - 1] = jumpedChecker;
         //System.out.println("undo subjump " + column + "," + row + " to " + targetColumn + "," + targetRow);
         //System.out.println("*******\n" + toString());
     }
     //TODO need to be able to undo becoming a king
-    public void undoSubStep(int column, int row, int targetColumn, int targetRow){
-        board[targetColumn - 1][targetRow - 1] = board[column - 1][row - 1];
+    public void undoSubStep(int column, int row, int targetColumn, int targetRow, boolean becameKing){
+        if(becameKing){
+            board[targetColumn - 1][targetRow - 1] = board[column - 1][row - 1].revertKing();
+        }
+        else{
+            board[targetColumn - 1][targetRow - 1] = board[column - 1][row - 1];
+        }
         board[column - 1][row - 1] = EMPTY;
         //System.out.println("undo step " + column + "," + row + " to " + targetColumn + "," + targetRow);
         //System.out.println("*******\n" + toString());
     }
 
-    public void undoStep(ArrayList<Integer> move){
-        undoSubStep(move.get(2), move.get(3), move.get(0), move.get(1));
+    public void undoStep(ArrayList<Integer> move, boolean becameKing){
+        undoSubStep(move.get(2), move.get(3), move.get(0), move.get(1), becameKing);
         whiteTurn = !whiteTurn;
     }
 
-    public void undoJump(ArrayList<Integer> move, ArrayList<Checker> jumpedCheckers){
+    public void undoJump(ArrayList<Integer> move, ArrayList<Checker> jumpedCheckers, boolean becameKing){
         int counter = 1;
         for(int i = move.size() - 4; i >= 0; i = i - 2){ //TODO, should i be >= 3, or some other value
             undoSubJump(move.get(i + 2), move.get(i + 3), move.get(i), move.get(i + 1),
-                    jumpedCheckers.get(jumpedCheckers.size() - counter));
+                    jumpedCheckers.get(jumpedCheckers.size() - counter), becameKing); //Technically this "reverts king" every time but the outcome is the same.
             counter++;
         }
         whiteTurn = !whiteTurn;
@@ -273,7 +289,36 @@ public class Game {
         this.whiteTurn = isWhiteTurn ;
     }
 
+    public boolean isKing(int column, int row){
+        return board[column - 1][row - 1].isKing();
+    }
 
+    //like checkSubStep but it does no care whose turn it is.
+    public boolean checkSubStepTurnless(int column, int row, int targetColumn, int targetRow){
+        return checkDark(column, row)
+                && checkDark(targetColumn, targetRow)
+                && board[column - 1][row - 1].isChecker()
+                //&& board[column - 1][row - 1].isWhite() == whiteTurn
+                && board[targetColumn - 1][targetRow - 1] == Checker.EMPTY
+                && Math.abs(targetColumn - column) == 1
+                && (movingForward(row, targetRow) || board[column - 1][row -1].isKing())
+                && Math.abs(targetColumn - column) == 1
+                && Math.abs(targetRow - row) == 1;
+    }
+
+    //like checkSubJump but it does no care whose turn it is.
+    public boolean checkSubJumpTurnless(int column, int row, int targetColumn, int targetRow){
+        return checkDark(column, row)
+                && checkDark(targetColumn, targetRow)
+                && board[column - 1][row - 1].isChecker()
+                //&& board[column - 1][row - 1].isWhite() == whiteTurn
+                && board[targetColumn - 1][targetRow - 1] == EMPTY
+                && Math.abs(targetColumn - column) == 2
+                && Math.abs(targetRow - row) == 2
+                && (movingForward(row, targetRow) || board[column - 1][row - 1].isKing())
+                && board[(targetColumn - column) / 2 + column - 1][(targetRow - row) / 2 + row - 1].isChecker()
+                && board[(targetColumn - column) / 2 + column - 1][(targetRow - row) / 2 + row - 1].isWhite() != board[column - 1][row - 1].isWhite();
+    }
 
 
     //Heuristic Below
@@ -283,7 +328,7 @@ public class Game {
             int preCol = row % 2;
             for(int column = preCol; column <= 7; column += 2){
                 if(board[column][row].isChecker()){
-                    result += evaluateChecker(column + 1, row + 1, board[column][row]);
+                    result += evaluateChecker(column, row, board[column][row]);
                 }
             }
         }
@@ -298,7 +343,7 @@ public class Game {
         if(column == 7 && row % 2 == 1){
             result += 100;
         }
-        result += 10 * distanceFromBackRow(row, checker.isWhite());
+        result += 10; //* distanceFromBackRow(row, checker.isWhite());
         if(checker.isKing()){
             result = result * 3; //Maybe kings should be scored in a way that does not favor moving further from its start.
         }

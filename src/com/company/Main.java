@@ -28,10 +28,10 @@ public class Main {
             game.move(players[turnNumber % 2].getMove());
             //playing = !game.currentPlayerWins(); //Replace this line.
             if(!game.playerCanMove(true)){
-                System.out.println("The white player wins!");
+                System.out.println("The black player wins!");
                 playing = false;
             }if(!game.playerCanMove(false)){
-                System.out.println("The black player wins!");
+                System.out.println("The white player wins!");
                 playing = false;
             }
             //game.nextTurn();

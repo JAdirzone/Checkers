@@ -21,9 +21,12 @@ public class JumpNodeHead extends JumpNode{
         this.originRow = row;
         this.children = new LinkedList<>();
         //TODO check if the checker that is about to move is a king
+        boolean movedKing = game.isKing(column, row);
         jumpedChecker = game.subJump(column, row, targetColumn, targetRow);
-        generateChildren(game);
-        game.undoSubJump(targetColumn, targetRow, originColumn, originRow, jumpedChecker); //TODO fis this line
+        if(movedKing || !game.isKing(targetColumn, targetRow)) {
+            generateChildren(game);
+        }
+        game.undoSubJump(targetColumn, targetRow, originColumn, originRow, jumpedChecker, !movedKing && game.isKing(targetColumn, targetRow)); //TODO just changed after dennis encountered bug
     }
 
     public ArrayList<Integer> nextFullNode(){

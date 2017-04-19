@@ -14,6 +14,7 @@ public class JumpNode {
     private JumpNode parent;
     protected LinkedList<JumpNode> children;
     protected Checker jumpedChecker;
+    //protected boolean movedKing;
 
     public JumpNode(Game game, int column, int row, JumpNode parent){
         this.column = column;
@@ -21,9 +22,13 @@ public class JumpNode {
         this.parent = parent;
         this.children = new LinkedList<>();
         //TODO check if the checker that is about to move is a king
+        boolean movedKing = game.isKing(parent.column, parent.row);
         jumpedChecker = game.subJump(parent.column, parent.row, column, row);
-        generateChildren(game);
-        game.undoSubJump(column, row, parent.column, parent.row, jumpedChecker);
+        if(movedKing || !game.isKing(column, row)){
+            generateChildren(game);
+        }
+        game.undoSubJump(column, row, parent.column, parent.row, jumpedChecker, !movedKing && game.isKing(column, row)); //add moved king here, remember to rework JumpNodeHead as well
+
     }
 
     public JumpNode(){

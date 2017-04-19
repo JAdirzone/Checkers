@@ -25,6 +25,8 @@ public class Node {
     public Node(Game game, Node parent, ArrayList<Integer> move, boolean max, int currentDepth){
         this.parent = parent;
         this.move = move;
+        //TODO is the checker about o move a king?
+        movedKing = game.isKing(move.get(0), move.get(1));
         this.jumpedCheckers = game.move(move);
         this.max = max; //I know this is also set in the sub-constructor, but I can change it later
         //System.out.print(game.toString());
@@ -55,7 +57,7 @@ public class Node {
         else{
             value = Integer.MAX_VALUE;
         }
-        //TODO check the check that's about to move to see if it is a king.
+        //TODO check the checker that's about to move to see if it is a king. NOT HERE
         //TODO Check for pruning here, for if children are possible. This means the hueristic will have to run here too. No it does not
         if(this.currentDepth <= maxDepth) {
             if (game.forcedJump()) {
@@ -68,7 +70,8 @@ public class Node {
         }
         else{
             value = game.heuristic();
-            System.out.println("Stall");
+            System.out.println("value " + value + " depth " + currentDepth);
+            //System.out.println("Stall");
         }
     }
 
@@ -83,14 +86,17 @@ public class Node {
     private void backTracked(Game game){
         System.out.println("Backtracked");
         if(isBetterValue(child.value)){
+            System.out.println("max:" + max + " took " + child.value + " over " + value + " depth " + currentDepth);
             value = child.value;
             bestMove = child.move;
         }
         //undo step
         if(Math.abs(child.move.get(0) - child.move.get(2)) == 1){
-            game.undoStep(child.move);
+            game.undoStep(child.move, !child.movedKing
+                    && game.isKing(child.move.get(child.move.size() - 2), child.move.get(child.move.size() - 1))); //TODO is this right?
         }else{ //undo jump
-            game.undoJump(child.move, child.jumpedCheckers);
+            game.undoJump(child.move, child.jumpedCheckers, !child.movedKing
+                    && game.isKing(child.move.get(child.move.size() - 2), child.move.get(child.move.size() - 1))); //TODO is this right?
         }
         // remove the child that just returned. May not be necessary
         child = null;
