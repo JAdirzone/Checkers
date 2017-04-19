@@ -34,18 +34,9 @@ public class Main {
                 System.out.println("The white player wins!");
                 playing = false;
             }
-            //game.nextTurn();
             turnNumber++;
         }
-        //TODO should move to next turn in the AI (also remember to undo)
 
-        /**
-        game.move(new ArrayList<>(Arrays.asList(1, 3, 2, 4)));
-        game.move(new ArrayList<>(Arrays.asList(4, 6, 3, 5)));
-        //game.move(new ArrayList<>(Arrays.asList(4, 6, 3, 5)));
-        new JumpNodeHead(game, 2, 4, 4, 6);
-        System.out.println("FINAL \n" + game.toString());
-         **/
     }
 
     private static int toInt(String string){
