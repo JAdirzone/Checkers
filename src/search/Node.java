@@ -64,52 +64,48 @@ public class Node {
         else{
             value = Integer.MAX_VALUE;
         }
-        //TODO check the checker that's about to move to see if it is a king. NOT HERE
-        //TODO Check for pruning here, for if children are possible. This means the hueristic will have to run here too. No it does not
         if(this.currentDepth <= maxDepth) {
             if (game.forcedJump()) {
-                //System.out.println("Jumped");
                 generateJumpChildren(game);
             } else {
-                //System.out.println("Stepped");
                 generateStepChildren(game);
             }
         }
         else{
             value = game.heuristic();
-            //rated = true;
-            //System.out.println("value " + value + " depth " + currentDepth);
-            //System.out.println("Stall");
+            //rated = true; //TODO shouldn't this be uncomment? I don't actually think it effects anything because only parent nodes are checked to see if they are rated, but I guess it should be marked rated anyway.
         }
     }
 
 
-
+    /**
+     *
+     * @param newValue
+     * @return Whether this node would prefer a given value over its current value.
+     */
     private boolean isBetterValue(int newValue){
-
+        // If two values are equal the new value will be judged as better half of the time.
+        // This should help to vary the AI players moves.
         if(newValue == value){
             Random rand = new Random();
-            return rand.nextInt(2) == 1; //If two values are the new value will be judged as better half of the time. This should help to vary the AI players moves.
+            return rand.nextInt(2) == 1;
         }
         return (max && newValue > value) || (!max && newValue < value);
     }
 
-    //Handles when this node is backtracked to.
-    //TODO should undo its child's move, not its own.
+    /**
+     * Handles when the node is back tracked to (when its child is done being evaluated).
+     * @param game
+     */
     private void backTracked(Game game){
-
-        //test
-        //System.out.println("Backtracked from considering " + (child.move.get(2) - child.move.get(0)) + " " + (child.move.get(3) - child.move.get(1)));
         if(isBetterValue(child.value)){
-            //System.out.println("max:" + max + " took " + child.value + " over " + value + " depth " + currentDepth);
             value = child.value;
-            rated = true; //moved
+            rated = true;
             bestMove = child.move;
             pruned = shouldPrune(value);
-            //System.out.println(pruned);
-            if(pruned){
-                System.out.println("Max: " + max + " value " + value + " parent value " + parent.value + " parent rated " + parent.rated);
-            }
+            //if(pruned){
+            //    System.out.println("Max: " + max + " value " + value + " parent value " + parent.value + " parent rated " + parent.rated);
+            //}
         }
         //undo step
         if(Math.abs(child.move.get(0) - child.move.get(2)) == 1){
@@ -119,18 +115,24 @@ public class Node {
             game.undoJump(child.move, child.jumpedCheckers, !child.movedKing
                     && game.isKing(child.move.get(child.move.size() - 2), child.move.get(child.move.size() - 1))); //TODO is this right?
         }
-        // remove the child that just returned. May not be necessary
+        // remove the child that just returned.
         child = null;
-        //game.nextTurn(); //technically switchturn THIS was problem, switching it may cause some more
     }
 
+    /**
+     * Creates a child node for this node
+     * @param game
+     * @param nextMove The move that the child node represents.
+     */
     private void branch(Game game, ArrayList<Integer> nextMove){
         child = new Node(game, this, nextMove, !max, currentDepth + 1);
         backTracked(game);
     }
 
-    //TODO values being passed to checkSubStep may be off by one. look into this. MADE CHANGE
-    //
+    /**
+     * Generate child for this node. Each child created will be the result of a "step", or a non-jump move.
+     * @param game
+     */
     private void generateStepChildren(Game game){
         for(int row = 0; row <= 7; row++){
             int preCol = row % 2;
@@ -193,6 +195,10 @@ public class Node {
         }
     }
 
+    /**
+     * Generate children for this node. Each child will be the result of a jump move.
+     * @param game
+     */
     public void generateJumpChildren(Game game){
         for(int row = 0; row <= 7; row++){
             int preCol = row % 2;
@@ -235,15 +241,25 @@ public class Node {
         }
     }
 
+    /**
+     * @param newValue
+     * @return Whether a node should be pruned based its new value as well as the value of its
+     * opposite (max -> min, min -> max) ancestors.
+     */
     private boolean shouldPrune(int newValue){
-        Node interestNode = this;
-        while(interestNode.currentDepth > 0){
-            if((!max && interestNode.parent.rated && interestNode.parent.value >= newValue)
-                    || (max && interestNode.parent.rated && interestNode.parent.value <= newValue)){
-                System.out.println("Max: " + max + " value " + value + " parent value " + interestNode.parent.value + " parent rated " + interestNode.parent.rated);
-                return true; //TODO CHANGE BACK TO TRUE
+        if(this.currentDepth > 0) {
+            Node interestNode = this.parent;
+            while (interestNode.parent != null) {
+                if ((!max && interestNode.max && interestNode.rated && interestNode.value >= newValue)
+                        || (max && !interestNode.max && interestNode.rated && interestNode.value <= newValue)) {
+                    System.out.println("Max: " + max + " value " + value + " parent value " + interestNode.value + " ancestor max " + interestNode.max);
+                    return true;
+                }
+                if(interestNode.currentDepth >= 0){
+                    interestNode = interestNode.parent;
+                }
+
             }
-            interestNode = interestNode.parent;
         }
         return false;
     }
